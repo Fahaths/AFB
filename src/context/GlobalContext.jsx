@@ -41,6 +41,22 @@ export const GlobalProvider = ({ children }) => {
           description: 'Modern shoulder bag with adjustable strap and premium finish.',
           image: 'https://images.unsplash.com/photo-1591561954557-26941169b49e?auto=format&fit=crop&q=80',
           category: 'bags'
+        },
+        {
+          id: '4',
+          name: 'Monarch Leather Loafers',
+          price: '199',
+          description: 'Soft leather loafers crafted for all-day comfort and elegance.',
+          image: 'https://images.unsplash.com/photo-1614252369475-531eba835eb1?auto=format&fit=crop&q=80',
+          category: 'footwear'
+        },
+        {
+          id: '5',
+          name: 'Noir Premium Sneakers',
+          price: '229',
+          description: 'Minimal premium sneakers with refined details and premium sole.',
+          image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80',
+          category: 'footwear'
         }
       ];
       setProducts(defaultProducts);
