@@ -1,0 +1,69 @@
+.latest-section {
+  width: 100%;
+  padding: 100px 0;
+  background: #f8f6f4;
+}
+
+.container {
+  width: 95%;
+  max-width: 1800px;
+  margin: auto;
+}
+
+/* HEADER */
+.latest-header h2 {
+  font-family: "Playfair Display", serif;
+  font-size: clamp(40px, 8vw, 100px);
+  font-weight: 900;
+  color: #0B1F3A;
+  margin-top: 2px;
+  line-height: 1.1;
+}
+
+.latest-header h2 span {
+  color: #C89B3C;
+}
+
+.latest-header p {
+  margin-top: 10px;
+  color: #666;
+  max-width: 500px;
+}
+
+/* GRID */
+.latest-grid {
+  margin-top: 60px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* CARD */
+.latest-card {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.latest-card img {
+  width: 100%;
+  height: 550px;
+  object-fit: cover;
+}
+
+/* RESPONSIVE */
+@media (max-width: 992px) {
+  .latest-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .latest-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .latest-card img {
+    height: 280px;
+  }
+}

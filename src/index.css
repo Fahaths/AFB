@@ -11,7 +11,9 @@
   --font-heading: 'Playfair Display', serif;
   --font-body: 'Poppins', sans-serif;
   --transition-fast: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-luxury: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.05);
+  --shadow-gold: 0 10px 25px rgba(200, 155, 60, 0.15);
   --radius-luxury: 12px;
 }
 
@@ -33,7 +35,10 @@ body {
   overflow-x: hidden;
 }
 
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   font-family: var(--font-heading);
   font-weight: 600;
   color: var(--primary-navy);
@@ -67,6 +72,43 @@ section {
   padding: var(--section-padding);
 }
 
+/* Luxury Typography & Reveal */
+.luxury-heading-container {
+  text-align: center;
+  margin-bottom: 50px;
+  position: relative;
+}
+
+.luxury-heading-container .tagline {
+  font-family: var(--font-body);
+  color: var(--accent-gold);
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.luxury-heading-container h2 {
+  font-size: clamp(2rem, 5vw, 2.8rem);
+  text-transform: capitalize;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 20px;
+}
+
+.luxury-heading-container h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 2px;
+  background: var(--accent-gold);
+}
+
 /* Navbar - Fixed Solid Navy */
 .navbar {
   position: fixed;
@@ -78,7 +120,7 @@ section {
   z-index: 1000;
   display: flex;
   align-items: center;
-  box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow-soft);
 }
 
 /* Luxury Card */

@@ -9,6 +9,18 @@ const AdminDashboard = () => {
   const [editingItem, setEditingItem] = useState(null);
   const [newItem, setNewItem] = useState({ name: '', price: '', description: '', image: '' });
 
+  // Persistent Reviews Moderation
+  const [adminReviews, setAdminReviews] = useState(() => {
+    const saved = localStorage.getItem('afb_reviews');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const deleteReview = (id) => {
+    const updated = adminReviews.filter(r => r.id !== id);
+    setAdminReviews(updated);
+    localStorage.setItem('afb_reviews', JSON.stringify(updated));
+  };
+
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -68,11 +80,17 @@ const AdminDashboard = () => {
         >
           Manage Hero Slides
         </button>
+        <button 
+          onClick={() => setActiveTab('reviews')} 
+          style={{ padding: '10px 20px', borderBottom: activeTab === 'reviews' ? '2px solid var(--accent-gold)' : 'none', color: activeTab === 'reviews' ? 'var(--accent-gold)' : '#666' }}
+        >
+          Manage Reviews
+        </button>
       </div>
 
       {activeTab === 'products' ? (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }}>
-          {/* Add New Product */}
+          {/* Add New Product ... remains same ... */}
           <div style={{ backgroundColor: '#fff', padding: '30px', borderRadius: '15px', boxShadow: 'var(--shadow-soft)' }}>
             <h3 style={{ marginBottom: '20px' }}>Add New Product</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
@@ -109,7 +127,6 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          {/* List Products */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
             {products.map(product => (
               <div key={product.id} style={{ backgroundColor: '#fff', padding: '15px', borderRadius: '10px', boxShadow: 'var(--shadow-soft)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -128,8 +145,7 @@ const AdminDashboard = () => {
             ))}
           </div>
         </div>
-      ) : (
-        /* Similar structure for Hero Slides - simplified for brevity */
+      ) : activeTab === 'hero' ? (
         <div>
           <h3>Manage Hero Slides</h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px', marginTop: '20px' }}>
@@ -145,6 +161,33 @@ const AdminDashboard = () => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      ) : (
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <h3>Customer Reviews</h3>
+            <button 
+              onClick={() => { localStorage.removeItem('afb_reviews'); setAdminReviews([]); }} 
+              style={{ backgroundColor: '#fee2e2', color: '#ef4444', padding: '8px 15px', borderRadius: '5px', border: 'none', fontSize: '0.85rem' }}
+            >
+              Clear All
+            </button>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            {adminReviews.length > 0 ? adminReviews.map(rev => (
+              <div key={rev.id} style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '10px', boxShadow: 'var(--shadow-soft)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
+                    <span style={{ fontWeight: '800', fontSize: '0.9rem' }}>{rev.name}</span>
+                    <span style={{ color: 'var(--accent-gold)', fontWeight: '900', fontSize: '0.75rem' }}>★ {rev.rating}</span>
+                  </div>
+                  <h5 style={{ marginBottom: '5px' }}>{rev.title}</h5>
+                  <p style={{ color: '#666', fontSize: '0.85rem' }}>{rev.text}</p>
+                </div>
+                <button onClick={() => deleteReview(rev.id)} style={{ color: '#ef4444', marginLeft: '20px' }}><Trash2 size={20} /></button>
+              </div>
+            )) : <p style={{ textAlign: 'center', padding: '40px', color: '#999' }}>No customer reviews to moderate.</p>}
           </div>
         </div>
       )}

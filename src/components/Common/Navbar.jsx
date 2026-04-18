@@ -4,15 +4,6 @@ import { User, Menu, X, Search } from 'lucide-react';
 
 const Navbar = () => {
   const location = useLocation();
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   return (
     <nav className="navbar" style={{ 
@@ -20,13 +11,14 @@ const Navbar = () => {
       top: 0,
       left: 0,
       width: '100%',
-      background: isScrolled ? '#0B1F3A' : 'transparent', 
+      background: '#0B1F3A', 
       height: '65px', 
       zIndex: 1000,
       display: 'flex',
       alignItems: 'center',
       transition: 'all 0.4s ease',
-      borderBottom: isScrolled ? 'none' : '1px solid rgba(255,255,255,0.1)'
+      borderBottom: '1px solid rgba(255,255,255,0.05)',
+      boxShadow: 'var(--shadow-soft)'
     }}>
       <div className="container" style={{ 
         display: 'grid', 
