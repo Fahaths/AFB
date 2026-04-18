@@ -8,6 +8,8 @@ import ProductDetail from './pages/ProductDetail';
 import AdminLayout from './pages/Admin/AdminLayout';
 import AdminLogin from './pages/Admin/AdminLogin';
 import AdminDashboard from './pages/Admin/AdminDashboard';
+import Collection from './pages/Collection';
+import Contact from './pages/Contact';
 import { useGlobal } from './context/GlobalContext';
 
 function App() {
@@ -26,6 +28,8 @@ function App() {
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={<Home />} />
+            <Route path="/collection" element={<Collection />} />
+            <Route path="/contact" element={<Contact />} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/admin" element={<AdminLogin />} />
             {isAdmin && (

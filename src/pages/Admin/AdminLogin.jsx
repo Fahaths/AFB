@@ -45,7 +45,7 @@ const AdminLogin = () => {
             />
           </div>
           {error && <p style={{ color: 'red', fontSize: '0.85rem', marginBottom: '15px' }}>{error}</p>}
-          <button type="submit" className="btn-premium" style={{ width: '100%', justifyContent: 'center' }}>
+          <button type="submit" className="btn-gold-primary" style={{ width: '100%', justifyContent: 'center' }}>
             Sign In
           </button>
         </form>

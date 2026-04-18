@@ -53,14 +53,16 @@ export const GlobalProvider = ({ children }) => {
       const defaultHero = [
         {
           id: '1',
-          title: 'Exquisite Leather Collection',
-          subtitle: 'Crafted for the modern individual who values timeless elegance.',
+          tagline: 'Handcrafted Perfection',
+          title: 'The Signature Heritage',
+          subtitle: 'Experience the pinnacle of artisanal craftsmanship with our exclusive leather collection.',
           image: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80'
         },
         {
           id: '2',
-          title: 'Luxury Redefined',
-          subtitle: 'Discover our new line of premium bags and accessories.',
+          tagline: 'Timeless Luxury',
+          title: 'Crafted for Elegance',
+          subtitle: 'A sophisticated blend of tradition and modern design for the discerning individual.',
           image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80'
         }
       ];

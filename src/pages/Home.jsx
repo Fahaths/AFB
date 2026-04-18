@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import HeroSlider from '../components/Home/HeroSlider';
-import ProductCard from '../components/Home/ProductCard';
+import ProductSlider from '../components/Home/ProductSlider';
 import { useGlobal } from '../context/GlobalContext';
 
 const Home = () => {
@@ -18,32 +18,20 @@ const Home = () => {
 
       {/* Collection Section */}
       <section id="collection">
-        <div className="container">
-          <div style={{ textAlign: 'center', marginBottom: '60px' }}>
-            <motion.span
+        <div className="container" style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
+          <div style={{ textAlign: 'center' }}>
+            <motion.h2 
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              style={{ color: 'var(--accent-gold)', textTransform: 'uppercase', letterSpacing: '3px', fontSize: '0.8rem', fontWeight: '600' }}
+              transition={{ duration: 0.3 }}
+              style={{ fontSize: '2.2rem' }}
             >
-              Curated Selection
-            </motion.span>
-            <motion.h2 
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              style={{ fontSize: '2.5rem', marginTop: '10px' }}
-            >
-              The Signature Collection
+              Latest Transitions
             </motion.h2>
           </div>
 
-          <div className="luxury-grid">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          <ProductSlider products={products} />
         </div>
       </section>
 

@@ -1,33 +1,97 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { User, Menu, X } from 'lucide-react';
+import { User, Menu, X, Search } from 'lucide-react';
 
 const Navbar = () => {
   const location = useLocation();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <nav className="navbar" style={{ background: 'var(--primary-navy)', height: '70px', boxShadow: '0 2px 20px rgba(0,0,0,0.1)' }}>
-      <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-        <Link to="/" style={{ 
-          fontFamily: 'var(--font-heading)', 
-          fontSize: '1.4rem', 
-          fontWeight: '700', 
-          color: '#ffffff', 
-          letterSpacing: '2px',
-          textTransform: 'uppercase'
-        }}>
-          AFB <span style={{ color: 'var(--accent-gold)' }}>LUXE</span>
-        </Link>
-
-        <div style={{ display: 'flex', gap: '40px', alignItems: 'center' }}>
-          <ul className="desktop-menu" style={{ display: 'flex', gap: '30px' }}>
-            <li><Link to="/" style={{ color: '#ffffff', fontSize: '0.85rem', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '1px' }}>Home</Link></li>
-            <li><a href="/#collection" style={{ color: '#ffffff', fontSize: '0.85rem', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '1px' }}>Collection</a></li>
-            <li><a href="/#about" style={{ color: '#ffffff', fontSize: '0.85rem', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '1px' }}>Philosophy</a></li>
-          </ul>
-          <Link to="/admin" style={{ color: 'var(--accent-gold)' }} title="Admin Panel">
-            <User size={20} />
+    <nav className="navbar" style={{ 
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100%',
+      background: isScrolled ? '#0B1F3A' : 'transparent', 
+      height: '65px', 
+      zIndex: 1000,
+      display: 'flex',
+      alignItems: 'center',
+      transition: 'all 0.4s ease',
+      borderBottom: isScrolled ? 'none' : '1px solid rgba(255,255,255,0.1)'
+    }}>
+      <div className="container" style={{ 
+        display: 'grid', 
+        gridTemplateColumns: '1fr auto 1fr', 
+        alignItems: 'center', 
+        width: '100%' 
+      }}>
+        {/* Left Side: Logo */}
+        <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+          <Link to="/" style={{ 
+            fontFamily: 'var(--font-heading)', 
+            fontSize: '1.25rem', 
+            fontWeight: '700', 
+            color: '#ffffff', 
+            letterSpacing: '3px',
+            textTransform: 'uppercase'
+          }}>
+            AFB <span style={{ color: 'var(--accent-gold)' }}>LUXE</span>
           </Link>
+        </div>
+
+        {/* Center: Navigation Links */}
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <ul style={{ display: 'flex', gap: '40px', margin: 0, padding: 0 }}>
+            <li>
+              <Link to="/" className="nav-link-luxury" style={{ 
+                color: '#ffffff', 
+                fontSize: '0.8rem', 
+                fontWeight: '500', 
+                textTransform: 'uppercase', 
+                letterSpacing: '1.5px',
+                opacity: location.pathname === '/' ? 1 : 0.8
+              }}>Home</Link>
+            </li>
+            <li>
+              <Link to="/collection" className="nav-link-luxury" style={{ 
+                color: '#ffffff', 
+                fontSize: '0.8rem', 
+                fontWeight: '500', 
+                textTransform: 'uppercase', 
+                letterSpacing: '1.5px',
+                opacity: location.pathname === '/collection' ? 1 : 0.8
+              }}>Collection</Link>
+            </li>
+            <li>
+              <Link to="/contact" className="nav-link-luxury" style={{ 
+                color: '#ffffff', 
+                fontSize: '0.8rem', 
+                fontWeight: '500', 
+                textTransform: 'uppercase', 
+                letterSpacing: '1.5px',
+                opacity: location.pathname === '/contact' ? 1 : 0.8
+              }}>Contact</Link>
+            </li>
+          </ul>
+        </div>
+
+        {/* Right Side: Search Icon */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+          <button style={{ color: '#ffffff', cursor: 'pointer', transition: 'color 0.3s ease' }} 
+                  onMouseOver={(e) => e.currentTarget.style.color = 'var(--accent-gold)'}
+                  onMouseOut={(e) => e.currentTarget.style.color = '#ffffff'}
+                  aria-label="Search">
+            <Search size={18} />
+          </button>
         </div>
       </div>
     </nav>
