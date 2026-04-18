@@ -37,7 +37,7 @@
   position: relative;
   background: #fff;
   border-radius: 40px;
-  padding: 60px;
+  padding: 40px;
   width: 100%;
   max-width: 550px;
   display: flex;
@@ -89,7 +89,7 @@
 }
 
 .pd-title-new {
-  font-size: 48px;
+  font-size: 40px;
   font-weight: 800;
   color: #1a1a1a;
   margin: 0;
@@ -325,12 +325,12 @@
 
 /* Reviews Section */
 .reviews-section {
-  margin-top: 120px;
+  margin-top: 80px;
   text-align: center;
 }
 
 .reviews-title {
-  font-size: 80px;
+  font-size: 42px;
   font-weight: 900;
   text-transform: uppercase;
   margin-bottom: 20px;
@@ -381,13 +381,13 @@
 
 /* Related Section */
 .related-section {
-  margin-top: 120px;
-  padding-bottom: 100px;
+  margin-top: 80px;
+  padding-bottom: 80px;
   text-align: center;
 }
 
 .related-title {
-  font-size: 60px;
+  font-size: 42px;
   font-weight: 900;
   text-transform: uppercase;
   margin-bottom: 60px;
