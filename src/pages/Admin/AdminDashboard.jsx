@@ -7,7 +7,7 @@ const AdminDashboard = () => {
   const { products, updateProducts, heroSlides, updateHeroSlides, logout } = useGlobal();
   const [activeTab, setActiveTab] = useState('products');
   const [editingItem, setEditingItem] = useState(null);
-  const [newItem, setNewItem] = useState({ name: '', price: '', description: '', image: '' });
+  const [newItem, setNewItem] = useState({ name: '', price: '', description: '', image: '', category: 'bags' });
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -32,7 +32,7 @@ const AdminDashboard = () => {
     if (!newItem.name || !newItem.price || !newItem.image) return;
     const productToAdd = { ...newItem, id: Date.now().toString() };
     updateProducts([...products, productToAdd]);
-    setNewItem({ name: '', price: '', description: '', image: '' });
+    setNewItem({ name: '', price: '', description: '', image: '', category: 'bags' });
   };
 
   const deleteProduct = (id) => {
@@ -96,6 +96,14 @@ const AdminDashboard = () => {
                 onChange={(e) => setNewItem({...newItem, description: e.target.value})}
                 style={{ padding: '12px', borderRadius: '8px', border: '1px solid #ddd', height: '100px' }}
               />
+              <select
+                value={newItem.category}
+                onChange={(e) => setNewItem({...newItem, category: e.target.value})}
+                style={{ padding: '12px', borderRadius: '8px', border: '1px solid #ddd' }}
+              >
+                <option value="bags">Bags</option>
+                <option value="footwear">Footwear</option>
+              </select>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} id="add-img" />
                 <label htmlFor="add-img" style={{ cursor: 'pointer', padding: '10px 20px', backgroundColor: '#eee', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
