@@ -12,6 +12,8 @@ export default function CheckoutPage() {
   const { cartTotal, cartCount, clearCart, mounted } = useCart();
   const [complete, setComplete] = useState(false);
 
+  if (!mounted) return null;
+
   const handlePlaceOrder = (e) => {
     e.preventDefault();
     setComplete(true);
