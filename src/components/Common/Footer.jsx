@@ -1,9 +1,15 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { MapPin, Phone, Mail, Globe, Send, Share2 } from 'lucide-react';
 
 export default function Footer() {
+  const pathname = usePathname();
+  const isAdminPage = pathname?.startsWith('/admin');
+
+  if (isAdminPage) return null;
+
   return (
     <footer className="bg-[#061426] text-white py-20 px-6 md:px-12 lg:px-24 border-t border-white/5 font-sans">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-24 text-left">

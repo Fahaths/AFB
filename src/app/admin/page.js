@@ -3,12 +3,16 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { uploadProductImage, deleteProductImage } from '@/utils/storage';
-import { Plus, Loader2, LayoutDashboard, Settings, LogOut } from 'lucide-react';
+import { Plus, Loader2, LayoutDashboard, Settings, LogOut, Image as ImageIcon, MessageSquare } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { motion, AnimatePresence } from 'framer-motion';
 import ProductTable from '@/components/Admin/ProductTable';
 import ProductForm from '@/components/Admin/ProductForm';
+import AssetManager from '@/components/Admin/AssetManager';
+import ReviewManager from '@/components/Admin/ReviewManager';
 
 export default function AdminPage() {
+  const [activeTab, setActiveTab] = useState('inventory');
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -52,13 +56,18 @@ export default function AdminPage() {
   const handleFormSubmit = async (formData) => {
     setIsSubmitting(true);
     try {
-      let imageUrl = editingProduct?.image_url || '';
+      const finalImageUrls = [];
 
-      if (formData.image) {
-        if (editingProduct?.image_url) {
-          await deleteProductImage(editingProduct.image_url);
+      // Process all selected assets
+      for (const asset of formData.allAssets) {
+        if (typeof asset === 'string') {
+          // It's an existing URL, keep it
+          finalImageUrls.push(asset);
+        } else {
+          // It's a new File, upload it
+          const url = await uploadProductImage(asset);
+          finalImageUrls.push(url);
         }
-        imageUrl = await uploadProductImage(formData.image);
       }
 
       const productData = {
@@ -66,7 +75,13 @@ export default function AdminPage() {
         price: parseFloat(formData.price),
         description: formData.description,
         category: formData.category,
-        image_url: imageUrl
+        type: formData.type,
+        val: formData.val,
+        material: formData.material,
+        item_code: formData.item_code,
+        tags: formData.tags,
+        image_url: finalImageUrls[0] || '', // Primary image
+        images: finalImageUrls // Full gallery
       };
 
       if (editingProduct) {
@@ -110,96 +125,171 @@ export default function AdminPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F8F6F4]">
-        <form onSubmit={handleLogin} className="bg-white p-10 rounded-3xl shadow-xl border border-gray-100 w-full max-w-sm text-center">
-          <div className="w-16 h-16 bg-primary-navy rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-lg shadow-navy-100">
-            <span className="text-white text-2xl font-bold tracking-tighter">AF</span>
+      <div className="min-h-screen flex items-center justify-center bg-[#0A1628] p-6 relative overflow-hidden">
+        {/* Background Accents */}
+        <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent-gold/5 blur-[120px] rounded-full"></div>
+        <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-accent-gold/5 blur-[120px] rounded-full"></div>
+
+        <motion.form 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          onSubmit={handleLogin} 
+          className="bg-[#0D1F35] p-12 rounded-[40px] shadow-2xl border border-white/5 w-full max-w-sm text-center relative z-10"
+        >
+          <div className="w-20 h-20 bg-accent-gold rounded-3xl flex items-center justify-center mx-auto mb-10 shadow-2xl shadow-accent-gold/20 rotate-3">
+            <span className="text-primary-navy text-2xl font-black">AF</span>
           </div>
-          <h1 className="text-2xl font-black text-primary-navy mb-2">Vault Access</h1>
-          <p className="text-gray-400 text-sm mb-8">Enter passphrase to manage inventory</p>
-          <div className="space-y-4">
-            <input 
-              type="password" 
-              autoFocus
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-5 py-4 rounded-2xl bg-gray-50 border-none focus:ring-2 focus:ring-accent-gold outline-none text-center font-bold tracking-[0.4em]"
-              placeholder="••••••••"
-            />
-            <button type="submit" className="w-full bg-primary-navy text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-[#061426] transition-all">
-              Initialize Portal
+          <h1 className="text-3xl font-serif italic text-white mb-3">Vault Access</h1>
+          <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em] mb-10">Administrative Control Layer</p>
+          
+          <div className="space-y-6">
+            <div className="relative group">
+              <input 
+                type="password" 
+                autoFocus
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-6 py-5 rounded-2xl bg-[#152B46] border border-white/5 text-white focus:ring-2 focus:ring-accent-gold outline-none text-center font-bold tracking-[0.5em] placeholder:text-gray-700 transition-all"
+                placeholder="••••••••"
+              />
+            </div>
+            <button type="submit" className="w-full bg-accent-gold text-primary-navy py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] hover:bg-white hover:scale-[1.02] transition-all shadow-xl shadow-accent-gold/10">
+              Unlock Terminal
             </button>
           </div>
-        </form>
+        </motion.form>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F6F4] flex">
-      {/* Sidebar */}
-      <aside className="w-64 bg-primary-navy hidden lg:flex flex-col p-8 fixed h-full inset-y-0 z-50">
-        <div className="flex items-center gap-3 mb-12">
-          <div className="w-10 h-10 bg-accent-gold rounded-xl flex items-center justify-center font-black text-white">AF</div>
-          <div className="flex flex-col">
-            <span className="text-white text-xs font-black uppercase tracking-widest">Al Fahath</span>
-            <span className="text-accent-gold text-[10px] font-bold uppercase tracking-[0.2em] opacity-80">Admin Vault</span>
+    <div className="min-h-screen bg-[#FDFCFB] flex">
+      {/* Sidebar: Elite Minimal Navigation */}
+      <aside className="w-64 bg-primary-navy flex flex-col fixed h-full inset-y-0 z-50 border-r border-[#0A1A2F] shadow-[10px_0_30px_rgba(0,0,0,0.02)]">
+        <div className="p-8 pb-12">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-accent-gold rounded-xl flex items-center justify-center font-black text-primary-navy shadow-lg shadow-accent-gold/20">AF</div>
+            <div className="flex flex-col">
+              <span className="text-white text-[10px] font-black uppercase tracking-[0.2em] leading-none mb-1">Vault</span>
+              <span className="text-accent-gold text-[8px] font-bold uppercase tracking-[0.3em] opacity-60">Admin Portal</span>
+            </div>
           </div>
         </div>
 
-        <nav className="flex-1 space-y-2">
-          <button className="flex items-center gap-4 w-full px-5 py-4 rounded-2xl bg-accent-gold text-white font-bold text-sm transition-all">
-            <LayoutDashboard size={20} /> Inventory
-          </button>
-          <button className="flex items-center gap-4 w-full px-5 py-4 rounded-2xl text-white/50 hover:text-white transition-all font-bold text-sm">
-            <Settings size={20} /> Settings
-          </button>
+        <nav className="flex-1 px-4 space-y-1">
+          {[
+            { id: 'inventory', icon: <LayoutDashboard size={18} />, label: 'Inventory' },
+            { id: 'assets', icon: <ImageIcon size={18} />, label: 'Design' },
+            { id: 'feedback', icon: <MessageSquare size={18} />, label: 'Feedback' },
+          ].map((item) => (
+            <button 
+              key={item.id}
+              onClick={() => setActiveTab(item.id)}
+              className={`flex items-center gap-4 w-full px-5 py-3.5 rounded-xl transition-all duration-300 group ${
+                activeTab === item.id 
+                ? 'bg-accent-gold/5 text-accent-gold border-r-4 border-accent-gold' 
+                : 'text-white/40 hover:text-white/80 hover:bg-white/5'
+              }`}
+            >
+              <span className={`transition-transform duration-300 ${activeTab === item.id ? 'scale-110' : 'group-hover:translate-x-1'}`}>
+                {item.id === 'inventory' ? <LayoutDashboard size={18} /> : 
+                 item.id === 'assets' ? <ImageIcon size={18} /> : <MessageSquare size={18} />}
+              </span>
+              <span className="font-black uppercase tracking-[0.2em] text-[9px]">{item.label}</span>
+            </button>
+          ))}
         </nav>
 
-        <button onClick={() => window.location.reload()} className="flex items-center gap-4 w-full px-5 py-4 rounded-2xl text-red-400 hover:bg-red-500/10 transition-all font-bold text-sm mt-auto">
-          <LogOut size={20} /> Logout
-        </button>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1 lg:ml-64 p-6 md:p-12 overflow-y-auto">
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
-          <div>
-            <h1 className="text-4xl font-black text-primary-navy tracking-tighter">Current Inventory</h1>
-            <p className="text-gray-400 font-medium mt-1">Efficiently manage your luxury collection and digital assets.</p>
+        <div className="p-6 mt-auto">
+          <div className="p-5 bg-[#0A1A2F] rounded-2xl border border-white/5 mb-6">
+             <div className="flex items-center gap-2 mb-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
+                <span className="text-white/80 text-[8px] font-black uppercase tracking-widest">Operator Active</span>
+             </div>
+             <p className="text-white/30 text-[8px] leading-relaxed">Secure Node Alpha-7</p>
           </div>
           <button 
-            onClick={() => { setEditingProduct(null); setIsModalOpen(true); }}
-            className="bg-primary-navy text-white px-8 py-4 rounded-2xl font-black flex items-center gap-3 hover:shadow-2xl hover:bg-[#061426] transition-all uppercase tracking-widest text-xs"
+            onClick={() => window.location.reload()} 
+            className="flex items-center gap-4 w-full px-5 py-3.5 rounded-xl text-white/40 hover:text-red-400 hover:bg-red-400/5 transition-all group"
           >
-            <Plus size={20} /> Register Item
+            <LogOut size={16} className="group-hover:rotate-12 transition-transform" />
+            <span className="font-black uppercase tracking-[0.2em] text-[9px]">Sign Out</span>
           </button>
-        </header>
+        </div>
+      </aside>
 
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-32 bg-white rounded-[40px] border border-gray-100 shadow-sm">
-            <Loader2 className="animate-spin text-accent-gold" size={48} />
-            <p className="mt-4 text-gray-400 font-black uppercase tracking-widest text-[10px]">Synchronizing Vault...</p>
-          </div>
-        ) : (
-          <ProductTable 
-            products={products} 
-            onEdit={(p) => { setEditingProduct(p); setIsModalOpen(true); }} 
-            onDelete={handleDelete}
-            mounted={mounted}
-          />
-        )}
+      {/* Main Content: High-Performance Workplace */}
+      <main className="flex-1 lg:ml-64 min-h-screen">
+        <div className="max-w-7xl mx-auto p-12 lg:p-16">
+          {activeTab === 'inventory' ? (
+            <>
+              <motion.header 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-16"
+              >
+                <div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="h-[2px] w-8 bg-accent-gold/40"></span>
+                    <span className="text-accent-gold text-[9px] font-black uppercase tracking-[0.4em]">Inventory Hub</span>
+                  </div>
+                  <h1 className="text-4xl font-serif italic text-primary-navy tracking-tight">Master <span className="text-accent-gold not-italic font-black uppercase text-3xl ml-2">Legacy</span></h1>
+                </div>
+                
+                <button 
+                  onClick={() => { setEditingProduct(null); setIsModalOpen(true); }}
+                  className="bg-primary-navy text-white px-8 py-4 rounded-xl font-black uppercase tracking-[0.2em] text-[10px] hover:shadow-[0_20px_40px_rgba(6,20,38,0.15)] hover:-translate-y-0.5 transition-all flex items-center gap-3 border border-white/5"
+                >
+                  <Plus size={16} strokeWidth={3} className="text-accent-gold" /> Curate Item
+                </button>
+              </motion.header>
+
+              {loading ? (
+                <div className="flex flex-col items-center justify-center py-40">
+                  <Loader2 className="animate-spin text-accent-gold mb-6" size={48} strokeWidth={1} />
+                  <p className="text-primary-navy font-black uppercase tracking-[0.5em] text-[10px] opacity-40">Accessing Vault...</p>
+                </div>
+              ) : (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="bg-white rounded-[32px] border border-gray-100 shadow-[0_30px_60px_rgba(0,0,0,0.02)] overflow-hidden"
+                >
+                  <ProductTable 
+                    products={products} 
+                    onEdit={(p) => { setEditingProduct(p); setIsModalOpen(true); }} 
+                    onDelete={handleDelete}
+                    mounted={mounted}
+                  />
+                </motion.div>
+              )}
+            </>
+          ) : activeTab === 'assets' ? (
+            <AssetManager />
+          ) : (
+            <ReviewManager />
+          )}
+        </div>
       </main>
 
       {/* Modal / Form */}
-      {isModalOpen && (
-        <ProductForm 
-          initialData={editingProduct} 
-          isSubmitting={isSubmitting}
-          onClose={() => setIsModalOpen(false)}
-          onSubmit={handleFormSubmit}
-        />
-      )}
+      <AnimatePresence>
+        {isModalOpen && (
+          <ProductForm 
+            initialData={editingProduct} 
+            isSubmitting={isSubmitting}
+            onClose={() => setIsModalOpen(false)}
+            onSubmit={handleFormSubmit}
+          />
+        )}
+      </AnimatePresence>
+
+      <style jsx global>{`
+        @keyframes loading {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(300%); }
+        }
+      `}</style>
     </div>
   );
 }

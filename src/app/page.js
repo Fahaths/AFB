@@ -8,13 +8,11 @@ import { supabase } from '@/lib/supabase';
 import ProductCard from '@/components/Product/ProductCard';
 import { Loader2 } from 'lucide-react';
 
-const IMAGES = [
-  "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?q=80&w=2069&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1594101419759-4673f47f2873?q=80&w=2070&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2070&auto=format&fit=crop"
-];
-
 export default function Home() {
+  const [heroSlides, setHeroSlides] = useState([
+    "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?q=80&w=2069&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1594101419759-4673f47f2873?q=80&w=2070&auto=format&fit=crop"
+  ]);
   const [currentImage, setCurrentImage] = useState(0);
   const [mounted, setMounted] = useState(false);
   const [latestProducts, setLatestProducts] = useState([]);
@@ -22,8 +20,22 @@ export default function Home() {
 
   useEffect(() => {
     setMounted(true);
+
+    async function fetchDesign() {
+      const { data } = await supabase
+        .from('site_settings')
+        .select('value')
+        .eq('key', 'hero_slides')
+        .single();
+
+      if (data?.value && Array.isArray(data.value) && data.value.length > 0) {
+        setHeroSlides(data.value);
+      }
+    }
+    fetchDesign();
+
     const interval = setInterval(() => {
-      setCurrentImage((prev) => (prev + 1) % IMAGES.length);
+      setCurrentImage((prev) => (prev + 1) % heroSlides.length);
     }, 5000);
 
     async function fetchLatest() {
@@ -32,21 +44,21 @@ export default function Home() {
         .select('*')
         .order('created_at', { ascending: false })
         .limit(4);
-      
+
       if (!error) setLatestProducts(data);
       setLoading(false);
     }
     fetchLatest();
 
     return () => clearInterval(interval);
-  }, []);
+  }, [heroSlides.length]);
 
   if (!mounted) return null;
 
   return (
     <div className="relative min-h-screen bg-primary-navy overflow-x-hidden font-sans">
       <Navbar />
-      
+
       {/* Hero Section */}
       <div className="relative h-screen overflow-hidden">
         {/* Background Image Slider */}
@@ -59,7 +71,7 @@ export default function Home() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 2, ease: "easeInOut" }}
-              src={IMAGES[currentImage]}
+              src={heroSlides[currentImage]}
               className="w-full h-full object-cover"
               alt="Hero Exhibition"
             />
@@ -83,8 +95,8 @@ export default function Home() {
             </p>
 
             <div className="flex items-center">
-              <Link 
-                href="/collection" 
+              <Link
+                href="/collection"
                 className="px-10 py-5 border-2 border-accent-gold rounded-xl text-white font-bold uppercase tracking-[0.3em] text-[13px] hover:bg-accent-gold transition-all duration-500 hover:shadow-2xl hover:shadow-accent-gold/20"
               >
                 Explore Collection
@@ -114,15 +126,20 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              {latestProducts.map((product) => (
+              {(latestProducts.length > 0 ? latestProducts : [
+                { id: 'h1', name: "Midnight Noir Handbag", price: 1850, category: "bags", material: "Saffiano", image_url: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=1935&auto=format&fit=crop" },
+                { id: 'h2', name: "Emerald Velvet Slippers", price: 650, category: "footwear", material: "Velvet", image_url: "https://images.unsplash.com/photo-1619441207908-42622abd2c1d?q=80&w=2071&auto=format&fit=crop" },
+                { id: 'h3', name: "Gold-Trimmed Chronograph", price: 12400, category: "accessories", material: "18k Gold", image_url: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?q=80&w=1999&auto=format&fit=crop" },
+                { id: 'h4', name: "Tuscan Leather Travel Bag", price: 3200, category: "bags", material: "Leather", image_url: "https://images.unsplash.com/photo-1547949003-9792a18a2601?q=80&w=2070&auto=format&fit=crop" }
+              ]).map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
           )}
 
           <div className="mt-16 flex justify-center">
-            <Link 
-              href="/collection" 
+            <Link
+              href="/collection"
               className="text-primary-navy font-black uppercase tracking-[0.4em] text-xs flex items-center gap-4 group hover:text-accent-gold transition-all"
             >
               View All Items <div className="w-12 h-[1px] bg-primary-navy group-hover:bg-accent-gold group-hover:w-20 transition-all"></div>
