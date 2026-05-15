@@ -1,153 +1,198 @@
 'use client';
 
-import Navbar from '@/components/Common/Navbar';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import ProductCard from '@/components/Product/ProductCard';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowRight } from 'lucide-react';
 
 export default function Home() {
-  const [heroSlides, setHeroSlides] = useState([
-    "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?q=80&w=2069&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1594101419759-4673f47f2873?q=80&w=2070&auto=format&fit=crop"
-  ]);
-  const [currentImage, setCurrentImage] = useState(0);
   const [mounted, setMounted] = useState(false);
   const [latestProducts, setLatestProducts] = useState([]);
+  const [heroSlides, setHeroSlides] = useState([
+    "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?q=80&w=2069&auto=format&fit=crop"
+  ]);
+  const [currentSlide, setCurrentSlide] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setMounted(true);
-
-    async function fetchDesign() {
-      const { data } = await supabase
-        .from('site_settings')
-        .select('value')
-        .eq('key', 'hero_slides')
-        .single();
-
-      if (data?.value && Array.isArray(data.value) && data.value.length > 0) {
-        setHeroSlides(data.value);
-      }
-    }
-    fetchDesign();
-
-    const interval = setInterval(() => {
-      setCurrentImage((prev) => (prev + 1) % heroSlides.length);
-    }, 5000);
-
-    async function fetchLatest() {
-      const { data, error } = await supabase
+    async function fetchData() {
+      // Fetch Products
+      const { data: prodData } = await supabase
         .from('products')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(4);
+        .limit(8);
 
-      if (!error) setLatestProducts(data);
+      if (prodData) setLatestProducts(prodData);
+
+      // Fetch Site Settings for Hero
+      const { data: settingsData } = await supabase
+        .from('site_settings')
+        .select('*')
+        .eq('key', 'hero_slides')
+        .single();
+
+      if (settingsData?.value && Array.isArray(settingsData.value)) {
+        const validSlides = settingsData.value.filter(s => s !== null);
+        if (validSlides.length > 0) setHeroSlides(validSlides);
+      }
+
       setLoading(false);
     }
-    fetchLatest();
+    fetchData();
+  }, []);
 
-    return () => clearInterval(interval);
-  }, [heroSlides.length]);
+  // Auto-rotate hero slides every 5 seconds if multiple exist
+  useEffect(() => {
+    if (heroSlides.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrentSlide(prev => (prev + 1) % heroSlides.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [heroSlides]);
 
   if (!mounted) return null;
 
   return (
-    <div className="relative min-h-screen bg-primary-navy overflow-x-hidden font-sans">
-      <Navbar />
+    <div className="relative min-h-screen bg-[#F7F3EE] overflow-x-hidden">
 
-      {/* Hero Section */}
-      <div className="relative h-screen overflow-hidden">
-        {/* Background Image Slider */}
+      {/* Cinematic Balanced Hero Section */}
+      <section className="relative min-h-[90vh] w-full flex flex-col lg:flex-row bg-[#071B34] pt-[130px] px-[8%] pb-20 overflow-hidden">
+        {/* Deep Luxury Background Overlay */}
         <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary-navy via-primary-navy/40 to-transparent z-10"></div>
-          <AnimatePresence mode="wait">
-            <motion.img
-              key={currentImage}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 2, ease: "easeInOut" }}
-              src={heroSlides[currentImage]}
-              className="w-full h-full object-cover"
-              alt="Hero Exhibition"
-            />
-          </AnimatePresence>
+          <div className="absolute inset-0 bg-gradient-to-br from-[#071B34] via-[#0B2A52] to-[#071B34]"></div>
+          <div className="absolute top-0 right-0 w-[1000px] h-[1000px] bg-[#C89B3C]/10 rounded-full blur-[180px] -translate-y-1/2 translate-x-1/4 opacity-60"></div>
+          <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-black/40 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/4 opacity-40"></div>
         </div>
 
-        {/* Content */}
-        <main className="relative z-20 h-full flex flex-col justify-center px-6 md:px-24 text-left">
+        {/* Left Side: Refined Typography (45%) */}
+        <div className="relative z-10 w-full lg:w-[45%] flex flex-col justify-start items-start">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 1, ease: "easeOut" }}
-            className="max-w-6xl w-full"
+            transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
+            className="max-w-[520px]"
           >
-            <h1 className="text-3xl md:text-6xl font-black text-white font-serif leading-tight mb-8 tracking-tighter uppercase sm:whitespace-nowrap">
-              Al Fahath Bag's <span className="text-accent-gold italic lowercase">and</span> Footwear
+            <div className="flex items-center gap-3 mb-8">
+              <span className="h-[1px] w-10 bg-[#C89B3C]"></span>
+              <span className="text-[#C89B3C] font-black uppercase tracking-[0.5em] text-[10px]">Al Fahath Archive</span>
+            </div>
+
+            <h1 className="text-[clamp(42px,5.5vw,76px)] font-bold text-white font-serif leading-[0.95] mb-8 tracking-tighter">
+              Legacy in <br />
+              the <span className="italic font-normal text-[#C89B3C]">Details.</span>
             </h1>
 
-            <p className="text-white/60 text-lg md:text-xl max-w-xl mb-12 font-medium tracking-wide">
-              Carry without limits.....
+            <p className="text-[#C8CDD4] text-[15px] mb-10 font-medium tracking-wide leading-[1.8] max-w-[380px]">
+              Discover the cinematic precision of Al Fahath, where editorial aesthetics meet centuries of global craftsmanship.
             </p>
 
-            <div className="flex items-center">
+            <div className="flex flex-wrap items-center gap-8">
               <Link
                 href="/collection"
-                className="px-10 py-5 border-2 border-accent-gold rounded-xl text-white font-bold uppercase tracking-[0.3em] text-[13px] hover:bg-accent-gold transition-all duration-500 hover:shadow-2xl hover:shadow-accent-gold/20"
+                className="group inline-flex items-center gap-4 px-10 py-4 bg-[#C89B3C] text-[#071B34] font-black uppercase tracking-[0.3em] text-[10px] rounded-xl transition-all duration-500 hover:scale-105 hover:shadow-[0_20px_60px_rgba(200,155,60,0.3)]"
               >
-                Explore Collection
+                Explore Archive
+                <ArrowRight size={16} className="group-hover:translate-x-2 transition-transform" />
               </Link>
             </div>
           </motion.div>
-        </main>
-      </div>
+        </div>
 
-      {/* Latest Collection Section */}
-      <section className="bg-white py-24 px-6 md:px-12 lg:px-24">
-        <div className="max-w-7xl mx-auto">
-          {/* Section Header */}
-          <div className="mb-16">
-            <h2 className="text-6xl md:text-8xl font-black text-primary-navy font-serif tracking-tighter leading-none mb-6">
-              Latest <span className="text-accent-gold">Collection</span>
-            </h2>
-            <p className="text-gray-400 text-lg md:text-xl max-w-2xl font-medium leading-relaxed">
-              Discover premium bags crafted for style, durability, and everyday excellence.
-            </p>
-          </div>
+        {/* Right Side: Cinematic Product Visual (55%) */}
+        <div className="relative z-10 w-full lg:w-[55%] flex items-center justify-center mt-12 lg:mt-0">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 30 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 1.5, delay: 0.3, ease: [0.23, 1, 0.32, 1] }}
+            className="relative w-full max-w-sm"
+          >
+            {/* Background Glow */}
+            <div className="absolute inset-0 bg-[#C89B3C]/10 rounded-full blur-[100px] scale-150"></div>
 
-          {/* Grid */}
-          {loading ? (
-            <div className="flex justify-center py-20">
-              <Loader2 className="animate-spin text-accent-gold" size={48} />
+            {/* Main Floating Image with AnimatePresence for transitions */}
+            <div className="relative z-10 p-12 aspect-square flex items-center justify-center">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentSlide}
+                  initial={{ opacity: 0, x: 20, scale: 0.95 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  exit={{ opacity: 0, x: -20, scale: 0.95 }}
+                  transition={{ duration: 0.8, ease: "easeInOut" }}
+                  className="w-full h-full"
+                >
+                  <motion.div
+                    animate={{
+                      y: [-10, 10, -10],
+                      rotate: [-1, 1, -1]
+                    }}
+                    transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                    className="w-full h-full"
+                  >
+                    <img
+                      src={heroSlides[currentSlide]}
+                      className="w-full h-full object-contain rounded-[40px] shadow-[0_50px_100px_rgba(0,0,0,0.4)] border border-white/5"
+                      alt="Luxury Masterpiece"
+                    />
+                  </motion.div>
+                </motion.div>
+              </AnimatePresence>
+              {/* Depth Overlay */}
+              <div className="absolute inset-0 rounded-[40px] bg-gradient-to-tr from-[#071B34]/30 to-transparent pointer-events-none"></div>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              {(latestProducts.length > 0 ? latestProducts : [
-                { id: 'h1', name: "Midnight Noir Handbag", price: 1850, category: "bags", material: "Saffiano", image_url: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=1935&auto=format&fit=crop" },
-                { id: 'h2', name: "Emerald Velvet Slippers", price: 650, category: "footwear", material: "Velvet", image_url: "https://images.unsplash.com/photo-1619441207908-42622abd2c1d?q=80&w=2071&auto=format&fit=crop" },
-                { id: 'h3', name: "Gold-Trimmed Chronograph", price: 12400, category: "accessories", material: "18k Gold", image_url: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?q=80&w=1999&auto=format&fit=crop" },
-                { id: 'h4', name: "Tuscan Leather Travel Bag", price: 3200, category: "bags", material: "Leather", image_url: "https://images.unsplash.com/photo-1547949003-9792a18a2601?q=80&w=2070&auto=format&fit=crop" }
-              ]).map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          )}
 
-          <div className="mt-16 flex justify-center">
-            <Link
-              href="/collection"
-              className="text-primary-navy font-black uppercase tracking-[0.4em] text-xs flex items-center gap-4 group hover:text-accent-gold transition-all"
+            {/* Accent Elements for Balance */}
+            <motion.div
+              animate={{ y: [5, -5, 5] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute -top-5 -right-5 w-20 h-20 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 flex items-center justify-center shadow-2xl z-20 hidden md:flex"
             >
-              View All Items <div className="w-12 h-[1px] bg-primary-navy group-hover:bg-accent-gold group-hover:w-20 transition-all"></div>
-            </Link>
-          </div>
+              <div className="text-center">
+                <span className="text-[#C89B3C] font-serif text-2xl block mb-0.5">
+                  0{currentSlide + 1}
+                </span>
+                <span className="text-white/40 text-[6px] font-black uppercase tracking-widest">Edition</span>
+              </div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
+      {/* Featured Editorial Collection Grid */}
+      <section className="py-32 px-6 md:px-[7%] bg-[#F7F3EE]">
+        <div className="max-w-[1280px] mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-16 items-end mb-24">
+            <div className="md:col-span-8">
+              <span className="text-[#C89B3C] font-black uppercase tracking-[0.5em] text-[10px] block mb-4">Volume 01 // Archive</span>
+              <h2 className="text-5xl md:text-7xl font-bold text-[#071B34] font-serif leading-tight">
+                Refined <span className="italic font-normal">Essentials.</span>
+              </h2>
+            </div>
+            <div className="md:col-span-4 pb-4">
+              <p className="text-[#7A7A7A] text-lg font-medium leading-relaxed">
+                Selected for their ability to define a moment and last a lifetime.
+              </p>
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="flex justify-center py-20">
+              <Loader2 className="animate-spin text-[#C89B3C]" size={48} />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16">
+              {latestProducts.map((product, idx) => (
+                <div key={product.id} className={idx % 4 === 1 || idx % 4 === 3 ? 'lg:translate-y-12' : ''}>
+                  <ProductCard product={product} />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

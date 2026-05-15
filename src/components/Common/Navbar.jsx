@@ -2,124 +2,110 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Search, ChevronRight, LayoutGrid, ShoppingBag, Footprints, Sparkles } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { Search, ShoppingBag, Menu, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Navbar() {
-  const [mounted, setMounted] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
-    setMounted(true);
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const slugify = (text) => text.toLowerCase().replace(/\s+/g, '-');
-
-  const navigationData = [
-    {
-      label: 'Bags',
-      icon: <ShoppingBag size={14} />,
-      items: ['Schoolbags', 'College Bags', 'Travel Bags', 'Handbags']
-    },
-    {
-      label: 'Footwear',
-      icon: <Footprints size={14} />,
-      items: ['Formal', 'Casual', 'Sports', 'Sandals', 'Slippers']
-    },
-    {
-      label: 'Accessories',
-      icon: <Sparkles size={14} />,
-      items: ['Watches', 'Belts', 'Shoe Polish']
-    }
+  const navLinks = [
+    { label: 'Home', href: '/' },
+    { label: 'Collection', href: '/collection' },
+    { label: 'Our Story', href: '/about' },
+    { label: 'Contact', href: '/contact' },
   ];
 
-  if (!mounted) return <div className="fixed top-0 left-0 w-full h-16 bg-[#061426] z-50"></div>;
-
   return (
-    <nav className="fixed top-0 left-0 w-full h-16 bg-[#061426] z-50 px-8 flex items-center justify-between shadow-sm border-b border-white/5">
-      {/* Brand Logo */}
-      <Link href="/" className="flex items-center">
-        <span className="text-white text-xl font-bold tracking-tight uppercase">
-          AFB <span className="text-accent-gold ml-1">LUXE</span>
-        </span>
-      </Link>
-
-      {/* Navigation Links */}
-      <div className="flex items-center gap-12">
-        <Link
-          href="/"
-          className="text-white hover:text-accent-gold text-[11px] font-bold uppercase tracking-[0.2em] transition-all"
-        >
-          Home
-        </Link>
-        
-        {/* Multi-Level Collection Dropdown */}
-        <div className="relative group/main h-16 flex items-center">
-          <Link
-            href="/collection"
-            className="flex items-center gap-2 text-white group-hover/main:text-accent-gold text-[11px] font-bold uppercase tracking-[0.2em] transition-all cursor-pointer"
-          >
-            Collection <ChevronRight size={12} className="rotate-90 text-white/40 group-hover/main:text-accent-gold transition-transform" />
+    <>
+      <nav 
+        className={`fixed top-0 left-0 w-full h-[80px] z-[1000] transition-all duration-500 ${
+          scrolled 
+            ? 'bg-[#071B34]/95 backdrop-blur-md shadow-2xl' 
+            : 'bg-[#071B34]/92 backdrop-blur-md'
+        }`}
+      >
+        <div className="max-w-[1280px] h-full mx-auto px-8 flex items-center justify-between">
+          
+          {/* Logo - Left */}
+          <Link href="/" className="flex items-center group relative z-10">
+            <span className="text-white text-2xl font-black tracking-tight font-serif uppercase">
+              AFB <span className="text-[#C89B3C] ml-1">LUXE</span>
+            </span>
           </Link>
 
-          {/* First Level: Categories */}
-          <div className="absolute top-full left-0 w-56 bg-[#061426] border border-white/5 rounded-b-2xl shadow-2xl py-2 opacity-0 invisible translate-y-2 group-hover/main:opacity-100 group-hover/main:visible group-hover/main:translate-y-0 transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] z-[60]">
-            {navigationData.map((cat) => (
-              <div key={cat.label} className="relative group/sub">
-                <Link
-                  href={`/collection/${slugify(cat.label)}`}
-                  className="w-full flex items-center justify-between px-5 py-3.5 text-[10px] font-bold uppercase tracking-widest text-white/60 hover:text-white hover:bg-white/5 transition-all group-hover/sub:bg-white/5 group-hover/sub:text-white"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-accent-gold/40 group-hover/sub:text-accent-gold transition-colors">{cat.icon}</span>
-                    {cat.label}
-                  </div>
-                  <ChevronRight size={14} className="text-white/20 group-hover/sub:text-accent-gold" />
-                </Link>
-
-                {/* Second Level: Types (Sideways) */}
-                <div className="absolute top-0 left-full w-56 bg-[#061426] border border-white/5 rounded-xl shadow-2xl py-2 ml-px opacity-0 invisible translate-x-2 group-hover/sub:opacity-100 group-hover/sub:visible group-hover/sub:translate-x-0 transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] z-[70]">
-                  {cat.items.map((item) => (
-                    <Link
-                      key={item}
-                      href={`/collection/${slugify(cat.label)}/${slugify(item)}`}
-                      className="w-full flex items-center justify-between px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-white/50 hover:text-white hover:bg-white/5 group/item transition-all"
-                    >
-                      {item}
-                      <div className="w-1 h-1 rounded-full bg-accent-gold scale-0 group-hover/item:scale-100 transition-transform duration-300" />
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            ))}
-            
-            <div className="mx-5 my-2 border-t border-white/5 pt-2">
+          {/* Navigation - Center */}
+          <div className="hidden lg:flex items-center gap-[40px] absolute left-1/2 -translate-x-1/2">
+            {navLinks.map((link) => (
               <Link
-                href="/collection"
-                className="flex items-center gap-3 px-0 py-2.5 text-[10px] font-black uppercase tracking-widest text-accent-gold hover:text-white transition-colors"
+                key={link.label}
+                href={link.href}
+                className={`relative text-[11px] font-black uppercase tracking-[3px] font-sans transition-all duration-300 group ${
+                  pathname === link.href ? 'text-[#C89B3C]' : 'text-white/60 hover:text-white'
+                }`}
               >
-                <LayoutGrid size={14} />
-                View Full Catalog
+                {link.label}
+                <span className={`absolute -bottom-2 left-0 h-[1.5px] bg-[#C89B3C] transition-all duration-500 ${
+                  pathname === link.href ? 'w-full' : 'w-0 group-hover:w-full'
+                }`}></span>
               </Link>
-            </div>
+            ))}
+          </div>
+
+          {/* Action Icons - Right */}
+          <div className="flex items-center gap-[24px] relative z-10">
+            <Link href="/collection" className="text-white/70 hover:text-[#C89B3C] transition-all hidden sm:block">
+              <Search size={20} strokeWidth={2} />
+            </Link>
+            <button 
+              onClick={() => setMobileMenuOpen(true)}
+              className="lg:hidden text-white/70 hover:text-white transition-all ml-2"
+            >
+              <Menu size={24} />
+            </button>
           </div>
         </div>
+      </nav>
 
-        <Link
-          href="/contact"
-          className="text-white hover:text-accent-gold text-[11px] font-bold uppercase tracking-[0.2em] transition-all"
-        >
-          Contact
-        </Link>
-      </div>
-
-      {/* Action Icons */}
-      <div className="flex items-center">
-        <Link 
-          href="/collection?search=focus" 
-          className="text-white hover:text-accent-gold transition-all p-2"
-        >
-          <Search size={18} strokeWidth={2.5} />
-        </Link>
-      </div>
-    </nav>
+      {/* Mobile Drawer */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div 
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: "spring", damping: 30, stiffness: 300 }}
+            className="fixed inset-0 bg-[#071B34] z-[2000] lg:hidden flex flex-col p-10"
+          >
+            <div className="flex justify-between items-center mb-20">
+              <span className="text-white text-2xl font-black font-serif tracking-tight uppercase">AFB <span className="text-[#C89B3C]">LUXE</span></span>
+              <button onClick={() => setMobileMenuOpen(false)} className="text-white"><X size={28} /></button>
+            </div>
+            <div className="flex flex-col gap-10">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-4xl font-black text-white/30 hover:text-[#C89B3C] font-serif transition-colors uppercase tracking-widest"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

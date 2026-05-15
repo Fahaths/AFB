@@ -6,7 +6,7 @@ export async function uploadProductImage(file) {
   const filePath = `images/${fileName}`;
 
   const { data, error } = await supabase.storage
-    .from('products')
+    .from('afb-inventory')
     .upload(filePath, file);
 
   console.log('Storage Upload - Data:', data);
@@ -15,7 +15,7 @@ export async function uploadProductImage(file) {
   if (error) throw error;
 
   const { data: { publicUrl } } = supabase.storage
-    .from('products')
+    .from('afb-inventory')
     .getPublicUrl(filePath);
 
   return publicUrl;
@@ -30,7 +30,7 @@ export async function deleteProductImage(url) {
     const filePath = `images/${fileName}`;
 
     const { data, error } = await supabase.storage
-      .from('products')
+      .from('afb-inventory')
       .remove([filePath]);
 
     console.log('Storage Delete - Data:', data);

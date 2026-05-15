@@ -1,319 +1,299 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import Navbar from '@/components/Common/Navbar';
-import Link from 'next/link';
-import {
-  ChevronRight,
-  Search,
-  Loader2,
-  ShoppingBag,
-  Footprints,
-  Sparkles,
-  LayoutGrid
-} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-
+import { Loader2, Search, ShoppingBag, Footprints, Watch, ChevronDown } from 'lucide-react';
 import ProductCard from '@/components/Product/ProductCard';
 
-export default function DynamicCollectionPage() {
-  const params = useParams();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const searchInputRef = useRef(null);
-  const slug = params.slug || [];
-  
+export default function CollectionPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [mounted, setMounted] = useState(false);
+  const [activeMain, setActiveMain] = useState('BAGS');
+  const [activeSub, setActiveSub] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('Newest first');
+  const [sortBy, setSortBy] = useState('Latest');
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [banners, setBanners] = useState({
-    all: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80',
-    bags: 'https://images.unsplash.com/photo-1544816153-12ad5d714b21?q=80&w=2070&auto=format&fit=crop',
-    footwear: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2070&auto=format&fit=crop',
-    accessories: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=2099&auto=format&fit=crop'
+    BAGS: 'https://images.unsplash.com/photo-1544816153-12ad5d714b21?q=80&w=2070&auto=format&fit=crop',
+    FOOTWEAR: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2070&auto=format&fit=crop',
+    ACCESSORIES: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=2099&auto=format&fit=crop'
   });
-
-  // Unslugify helper
-  const unslugify = (text) => text?.replace(/-/g, ' ');
-  const slugify = (text) => text?.toLowerCase().replace(/\s+/g, '-');
-
-  const activeCategory = unslugify(slug[0]) || 'all';
-  const activeType = unslugify(slug[1]) || 'all';
+  
+  const sortRef = useRef(null);
 
   const categorySystem = {
-    bags: ["schoolbags", "college bags", "travel bags", "handbags"],
-    footwear: ["formal", "casual", "sports", "sandals", "slippers"],
-    accessories: ["watches", "belts", "shoe polish"]
+    BAGS: {
+      icon: <ShoppingBag size={18} />,
+      sub: ["School Bags", "Travel Bags", "Laptop Bags", "Premium Collection"]
+    },
+    FOOTWEAR: {
+      icon: <Footprints size={18} />,
+      sub: ["Casual", "Formal", "Sneakers", "Luxury"]
+    },
+    ACCESSORIES: {
+      icon: <Watch size={18} />,
+      sub: ["Wallets", "Belts", "Caps", "Travel Accessories"]
+    }
   };
+
+  const sortOptions = [
+    "Latest",
+    "Oldest",
+    "Price: Low to High",
+    "Price: High to Low",
+    "A-Z",
+    "Z-A"
+  ];
 
   useEffect(() => {
     setMounted(true);
-    async function fetchDesign() {
-      const { data } = await supabase
+    async function fetchData() {
+      // Fetch Products
+      const { data: prodData } = await supabase.from('products').select('*');
+      if (prodData) setProducts(prodData);
+
+      // Fetch Banners
+      const { data: settingsData } = await supabase
         .from('site_settings')
-        .select('value')
+        .select('*')
         .eq('key', 'banners')
         .single();
       
-      if (data?.value) {
-        setBanners(prev => ({ ...prev, ...data.value }));
+      if (settingsData?.value) {
+        const dbBanners = settingsData.value;
+        setBanners(prev => ({
+          BAGS: dbBanners.bags || prev.BAGS,
+          FOOTWEAR: dbBanners.footwear || prev.FOOTWEAR,
+          ACCESSORIES: dbBanners.accessories || prev.ACCESSORIES
+        }));
       }
-    }
-    fetchDesign();
-
-    async function fetchProducts() {
-      const { data, error } = await supabase.from('products').select('*');
-      if (!error) setProducts(data || []);
+      
       setLoading(false);
     }
-    fetchProducts();
+    fetchData();
 
-    // Auto-focus search if requested via URL
-    if (searchParams.get('search') === 'focus') {
-      setTimeout(() => {
-        searchInputRef.current?.focus();
-        searchInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 500);
+    const handleClickOutside = (event) => {
+      if (sortRef.current && !sortRef.current.contains(event.target)) {
+        setIsSortOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const getSortedProducts = (items) => {
+    let sorted = [...items];
+    switch (sortBy) {
+      case 'Latest':
+        return sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      case 'Oldest':
+        return sorted.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      case 'Price: Low to High':
+        return sorted.sort((a, b) => a.price - b.price);
+      case 'Price: High to Low':
+        return sorted.sort((a, b) => b.price - a.price);
+      case 'A-Z':
+        return sorted.sort((a, b) => a.name.localeCompare(b.name));
+      case 'Z-A':
+        return sorted.sort((a, b) => b.name.localeCompare(a.name));
+      default:
+        return sorted;
     }
-  }, [searchParams]);
+  };
 
-  const topCategories = [
-    { id: 'all', label: 'All Items', icon: <LayoutGrid size={16} /> },
-    { id: 'bags', label: 'Bags', icon: <ShoppingBag size={16} /> },
-    { id: 'footwear', label: 'Footwear', icon: <Footprints size={16} /> },
-    { id: 'accessories', label: 'Accessories', icon: <Sparkles size={16} /> }
-  ];
-
-  const filteredProducts = products.filter(p => {
-    const categoryMatch = activeCategory === 'all' || p.category?.toLowerCase() === activeCategory;
-    const typeMatch = activeType === 'all' || p.type?.toLowerCase() === activeType;
+  const filteredProducts = getSortedProducts(products.filter(p => {
+    const mainMatch = p.category?.toUpperCase() === activeMain;
+    const subMatch = activeSub === 'ALL' || p.type?.toLowerCase() === activeSub.toLowerCase();
     const searchMatch = p.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
                        p.type?.toLowerCase().includes(searchQuery.toLowerCase());
-    return categoryMatch && typeMatch && searchMatch;
-  }).sort((a, b) => {
-    if (sortBy === 'Price: Low to High') return a.price - b.price;
-    if (sortBy === 'Price: High to Low') return b.price - a.price;
-    if (sortBy === 'Newest first') return new Date(b.created_at) - new Date(a.created_at);
-    return 0;
-  });
+    return mainMatch && subMatch && searchMatch;
+  }));
 
-  const handleCategoryChange = (id) => {
-    if (id === 'all') {
-      router.push('/collection');
-    } else {
-      router.push(`/collection/${id}`);
-    }
-    setSearchQuery('');
-  };
-
-  const handleTypeChange = (type) => {
-    if (type === 'all') {
-      router.push(`/collection/${slugify(activeCategory)}`);
-    } else {
-      router.push(`/collection/${slugify(activeCategory)}/${slugify(type)}`);
-    }
-  };
-
-  const typeIcons = {
-    schoolbags: <ShoppingBag size={14} />,
-    "college bags": <ShoppingBag size={14} />,
-    "travel bags": <ShoppingBag size={14} />,
-    handbags: <ShoppingBag size={14} />,
-    formal: <ShoppingBag size={14} />,
-    casual: <ShoppingBag size={14} />,
-    sports: <Footprints size={14} />,
-    sandals: <Footprints size={14} />,
-    slippers: <Footprints size={14} />,
-    watches: <Sparkles size={14} />,
-    belts: <Sparkles size={14} />,
-    "shoe polish": <Sparkles size={14} />
-  };
-
-  if (!mounted) return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
-      <Loader2 className="animate-spin text-accent-gold" size={40} />
-    </div>
-  );
+  if (!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-[#F8F6F4] font-sans">
-      <Navbar />
+    <div className="min-h-screen bg-[#F7F3EE] pb-32">
+      
+      {/* Cinematic Layered Hero Header */}
+      <header className="relative w-full overflow-hidden flex items-center justify-center h-[300px] md:h-[360px] lg:h-[420px] xl:h-[460px] bg-[#071B34]">
+        {/* Background Image Layer */}
+        <AnimatePresence mode="wait">
+          <motion.img 
+            key={activeMain}
+            src={banners[activeMain]}
+            initial={{ opacity: 0, scale: 1.1 }}
+            animate={{ opacity: 0.35, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.05 }}
+            transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute inset-0 w-full h-full object-cover object-center z-[1]"
+            alt=""
+          />
+        </AnimatePresence>
 
-      <main className="pt-32 pb-20 px-6 md:px-12 max-w-[1440px] mx-auto">
-        {/* Promo Banner Section */}
+        {/* Sophisticated Overlay Layer */}
+        <div className="absolute inset-0 z-[2] bg-gradient-to-b from-[rgba(7,27,52,0.72)] to-[rgba(7,27,52,0.55)]"></div>
+        
+        {/* Editorial Content Layer */}
         <motion.div
-           initial={{ opacity: 0, y: 30 }}
-           animate={{ opacity: 1, y: 0 }}
-           className="relative w-full aspect-[21/9] md:aspect-[3/1] rounded-[40px] overflow-hidden mb-16 group"
-         >
-           <img
-             src={banners[activeCategory] || banners.all}
-             className="w-full h-full object-cover brightness-110"
-             alt="Promotion"
-           />
-           <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/70 to-transparent flex flex-col justify-center px-12 md:px-24">
-             <h2 className="text-4xl md:text-6xl font-black text-primary-navy font-serif leading-[1.1] mb-8 tracking-tighter max-w-md">
-               Your bag, your style <br />
-               <span className="text-primary-navy font-serif italic font-normal">WhatsApp us now</span>
-             </h2>
-             <Link
-               href="https://wa.me/91XXXXXXXXXX"
-               className="bg-primary-navy text-white px-10 py-4 rounded-[40px] font-black uppercase tracking-widest text-xs w-fit hover:bg-accent-gold transition-all duration-500 shadow-xl shadow-navy-200"
-             >
-               Visit Shop
-             </Link>
-           </div>
-         </motion.div>
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.2, ease: [0.23, 1, 0.32, 1] }}
+          className="relative z-[10] text-center px-6 pt-10 md:pt-14 flex flex-col items-center"
+        >
+          <span className="text-[#C89B3C] font-black uppercase tracking-[0.6em] text-[10px] mb-6 block drop-shadow-sm">Archive 2026</span>
+          <h1 className="text-[clamp(56px,8vw,140px)] font-bold text-white font-serif tracking-tight leading-[0.95] mb-8 capitalize max-w-[1200px]">
+            The <span className="italic font-normal">Editorial</span> Collection
+          </h1>
+          <p className="text-white/40 text-[13px] font-black uppercase tracking-[0.5em] mt-2">Curated Heritage & Design</p>
+        </motion.div>
+      </header>
 
-        {/* Primary Category Filters - Custom Animated Design */}
-        <div className="flex flex-wrap justify-center gap-2 mb-10">
-          {topCategories.map((cat, idx) => (
-            <motion.button
-              key={cat.id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: idx * 0.05 }}
-              onClick={() => handleCategoryChange(cat.id)}
-              className={`px-8 py-4 overflow-hidden relative group cursor-pointer border-2 font-black uppercase tracking-[0.2em] text-[10px] rounded-full transition-all duration-500 ${
-                activeCategory === cat.id 
-                  ? 'bg-[#0B1F3A] border-[#0B1F3A] text-white shadow-xl shadow-navy-100/20' 
-                  : 'bg-white border-[#0B1F3A]/5 text-[#0B1F3A]'
+      {/* Category Navigation */}
+      <div className="max-w-[1280px] mx-auto px-6 mt-16 mb-12 flex flex-col items-center">
+        {/* Main Categories Row */}
+        <div className="flex flex-wrap justify-center gap-12 md:gap-16 mb-8 border-b border-black/5 pb-8 w-full md:w-auto">
+          {Object.entries(categorySystem).map(([key, data]) => (
+            <button
+              key={key}
+              onClick={() => {
+                setActiveMain(key);
+                setActiveSub('ALL');
+              }}
+              className={`flex items-center gap-3 relative pb-2 transition-all duration-300 group ${
+                activeMain === key ? 'text-[#C89B3C]' : 'text-[#7A7A7A] hover:text-[#071B34]'
               }`}
             >
-              <span className={`absolute w-64 h-0 transition-all duration-500 origin-center rotate-45 -translate-x-20 bg-[#0B1F3A] top-1/2 group-hover:h-64 group-hover:-translate-y-32 ease ${activeCategory === cat.id ? 'h-64 -translate-y-32' : ''}`}></span>
-              <span className={`relative flex items-center gap-3 transition duration-500 ease ${activeCategory === cat.id ? 'text-white' : 'group-hover:text-white'}`}>
-                <span className={`transition-colors duration-500 ${activeCategory === cat.id ? 'text-[#C89B3C]' : 'text-[#0B1F3A]/30 group-hover:text-[#C89B3C]'}`}>
-                  {cat.icon}
-                </span>
-                {cat.label}
+              <span className={`transition-transform duration-500 ${activeMain === key ? 'scale-110' : 'group-hover:scale-110'}`}>
+                {data.icon}
               </span>
-            </motion.button>
+              <span className="text-[11px] font-black uppercase tracking-[3px] font-sans">{key}</span>
+              {activeMain === key && (
+                <motion.div 
+                  layoutId="col-main-underline" 
+                  className="absolute bottom-[-1px] left-0 w-full h-[1.5px] bg-[#C89B3C]" 
+                />
+              )}
+            </button>
           ))}
         </div>
 
-        {/* Secondary Type Filters (Drill-down with Custom Design) */}
+        {/* Subcategories */}
         <AnimatePresence mode="wait">
-          {activeCategory !== 'all' && categorySystem[activeCategory] && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="flex flex-wrap justify-center gap-2 mb-12"
+          <motion.div
+            key={activeMain}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 10 }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+            className="flex flex-wrap justify-center gap-x-10 gap-y-4"
+          >
+            <button
+              onClick={() => setActiveSub('ALL')}
+              className={`text-[10px] font-black uppercase tracking-[2px] transition-all ${
+                activeSub === 'ALL' ? 'text-[#071B34]' : 'text-[#7A7A7A] hover:text-[#071B34]'
+              }`}
             >
+              All {activeMain.toLowerCase()}
+            </button>
+            {categorySystem[activeMain].sub.map((sub) => (
               <button
-                onClick={() => handleTypeChange('all')}
-                className={`flex items-center gap-2 px-6 py-3 overflow-hidden relative group cursor-pointer border-2 font-black uppercase tracking-widest text-[9px] rounded-xl transition-all duration-500 ${
-                  activeType === 'all' 
-                    ? 'bg-[#0B1F3A] border-[#0B1F3A] text-white shadow-lg shadow-navy-100/20' 
-                    : 'bg-white border-[#0B1F3A]/5 text-[#0B1F3A]'
+                key={sub}
+                onClick={() => setActiveSub(sub)}
+                className={`text-[10px] font-black uppercase tracking-[2px] transition-all flex items-center gap-2 group ${
+                  activeSub === sub ? 'text-[#071B34]' : 'text-[#7A7A7A] hover:text-[#071B34]'
                 }`}
               >
-                <span className={`absolute w-48 h-0 transition-all duration-500 origin-center rotate-45 -translate-x-12 bg-[#0B1F3A] top-1/2 group-hover:h-48 group-hover:-translate-y-24 ease ${activeType === 'all' ? 'h-48 -translate-y-24' : ''}`}></span>
-                <span className={`relative flex items-center gap-2 transition duration-500 ease ${activeType === 'all' ? 'text-white' : 'group-hover:text-white'}`}>
-                  <LayoutGrid size={14} />
-                  All {activeCategory}
-                </span>
+                <div className={`w-1 h-1 rounded-full bg-[#C89B3C] transition-transform duration-300 ${activeSub === sub ? 'scale-100' : 'scale-0 group-hover:scale-100'}`}></div>
+                {sub}
               </button>
-
-              {categorySystem[activeCategory].map((type) => (
-                <button
-                  key={type}
-                  onClick={() => handleTypeChange(type)}
-                  className={`flex items-center gap-2 px-6 py-3 overflow-hidden relative group cursor-pointer border-2 font-black uppercase tracking-widest text-[9px] rounded-xl transition-all duration-500 ${
-                    activeType === type 
-                      ? 'bg-[#C89B3C] border-[#C89B3C] text-white shadow-lg shadow-gold-100/20' 
-                      : 'bg-white border-[#C89B3C]/10 text-[#C89B3C]'
-                  }`}
-                >
-                  <span className={`absolute w-48 h-0 transition-all duration-500 origin-center rotate-45 -translate-x-12 bg-[#C89B3C] top-1/2 group-hover:h-48 group-hover:-translate-y-24 ease ${activeType === type ? 'h-48 -translate-y-24' : ''}`}></span>
-                  <span className={`relative flex items-center gap-2 transition duration-500 ease ${activeType === type ? 'text-white' : 'group-hover:text-white'}`}>
-                    <span className="shrink-0">{typeIcons[type.toLowerCase()] || <Sparkles size={14} />}</span>
-                    {type}
-                  </span>
-                </button>
-              ))}
-            </motion.div>
-          )}
+            ))}
+          </motion.div>
         </AnimatePresence>
+      </div>
 
-        {/* Search Bar Section */}
-        <div className="flex justify-center mb-12">
-          <div className="relative w-full max-w-xl">
-            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-[#0B1F3A]/30" size={20} />
-            <input
-              ref={searchInputRef}
+      {/* Modern Controls: Search & Sort */}
+      <div className="max-w-[1280px] mx-auto px-6 md:px-10 mb-16">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+          
+          {/* Search Bar */}
+          <div className="relative w-full md:w-[320px] group">
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-[#071B34] z-10 pointer-events-none transition-colors group-focus-within:text-[#C89B3C]" size={18} strokeWidth={2.5} />
+            <input 
               type="text"
-              placeholder="Searching for excellence..."
+              placeholder="Search collection..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white border border-gray-100 rounded-[24px] py-5 px-14 text-sm font-medium text-[#0B1F3A] focus:outline-none focus:ring-2 focus:ring-[#C89B3C]/20 focus:border-[#C89B3C] transition-all shadow-sm"
+              className="w-full h-[52px] bg-white/70 backdrop-blur-sm border border-[#0B1F3A]/8 rounded-[14px] px-14 text-sm font-medium focus:outline-none focus:ring-1 focus:ring-[#C89B3C]/20 transition-all shadow-sm"
             />
-            {searchQuery && (
-              <button 
-                onClick={() => setSearchQuery('')}
-                className="absolute right-5 top-1/2 -translate-y-1/2 text-[#0B1F3A]/40 hover:text-[#0B1F3A] transition-colors"
-              >
-                Clear
-              </button>
-            )}
           </div>
-        </div>
 
-        {/* Title Section & Sort Dropdown */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-8">
-          <h1 className="text-3xl md:text-5xl font-bold text-[#0B1F3A] font-serif leading-tight">
-            Every Luxury <span className="text-[#C89B3C]">For You!</span>
-          </h1>
-
-          <div className="relative group shrink-0">
-            <button className="flex items-center gap-3 px-6 py-3 bg-white border border-gray-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-[#0B1F3A] hover:border-[#0B1F3A]/20 transition-all shadow-sm group-hover:border-accent-gold/40">
-              Sort: {sortBy} <ChevronRight size={14} className="rotate-90 text-[#C89B3C]" />
+          {/* Sort By Dropdown */}
+          <div className="relative w-full md:w-[220px]" ref={sortRef}>
+            <button
+              onClick={() => setIsSortOpen(!isSortOpen)}
+              className="w-full h-[52px] bg-white border border-[#0B1F3A]/8 rounded-[14px] px-5 flex items-center justify-between text-sm font-medium text-[#071B34] hover:border-[#C89B3C]/30 transition-all shadow-sm group"
+            >
+              <div className="flex flex-col items-start leading-none">
+                <span className="text-[9px] font-black uppercase tracking-widest text-[#7A7A7A] mb-1">Sort By</span>
+                <span>{sortBy}</span>
+              </div>
+              <ChevronDown size={16} className={`text-[#7A7A7A] transition-transform duration-300 ${isSortOpen ? 'rotate-180' : ''}`} />
             </button>
-            <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-gray-100 rounded-xl shadow-2xl shadow-navy-200/20 py-2 z-50 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]">
-              {['Newest first', 'Price: Low to High', 'Price: High to Low'].map((option) => (
-                <button 
-                  key={option}
-                  onClick={() => setSortBy(option)}
-                  className={`w-full text-left px-5 py-3 text-[10px] font-bold uppercase tracking-widest flex items-center justify-between group/item transition-colors ${
-                    sortBy === option ? 'text-accent-gold bg-accent-gold/5' : 'text-[#0B1F3A]/60 hover:text-[#0B1F3A] hover:bg-gray-50'
-                  }`}
+
+            <AnimatePresence>
+              {isSortOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  transition={{ duration: 0.25 }}
+                  className="absolute top-[60px] left-0 w-full bg-white border border-black/5 rounded-[14px] shadow-[0_10px_30px_rgba(0,0,0,0.08)] overflow-hidden z-[50]"
                 >
-                  {option}
-                  <div className={`w-1 h-1 rounded-full bg-[#C89B3C] transition-transform duration-300 ${sortBy === option ? 'scale-100' : 'scale-0 group-hover/item:scale-100'}`} />
-                </button>
-              ))}
-            </div>
+                  {sortOptions.map((option) => (
+                    <button
+                      key={option}
+                      onClick={() => {
+                        setSortBy(option);
+                        setIsSortOpen(false);
+                      }}
+                      className={`w-full text-left px-5 py-3.5 text-sm font-medium transition-all ${
+                        sortBy === option 
+                          ? 'bg-[#F7F3EE] text-[#C89B3C]' 
+                          : 'text-[#071B34] hover:bg-[#F7F3EE] hover:text-[#C89B3C]'
+                      }`}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
+      </div>
 
-        {/* Product Grid with Staggered Pop Animations */}
+      {/* Editorial Product Grid */}
+      <main className="max-w-[1280px] mx-auto px-6 md:px-10">
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-40">
-            <Loader2 className="animate-spin text-accent-gold" size={40} />
-            <p className="mt-4 text-gray-400 font-bold uppercase tracking-widest text-[10px]">Assembling Vault...</p>
+          <div className="flex justify-center py-40">
+            <Loader2 className="animate-spin text-[#C89B3C]" size={40} />
           </div>
         ) : (
           <motion.div
             layout
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-10 md:gap-16"
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-10 gap-y-16"
           >
             <AnimatePresence mode="popLayout">
-              {filteredProducts.map((product, idx) => (
+              {filteredProducts.map((product) => (
                 <motion.div
                   key={product.id}
                   layout
-                  initial={{ opacity: 0, scale: 0.8, y: 30 }}
-                  animate={{ 
-                    opacity: 1, 
-                    scale: 1, 
-                    y: 0,
-                    transition: { delay: idx * 0.1, type: "spring", stiffness: 200, damping: 20 }
-                  }}
-                  exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.4 }}
                 >
                   <ProductCard product={product} />
                 </motion.div>
@@ -323,14 +303,13 @@ export default function DynamicCollectionPage() {
         )}
 
         {!loading && filteredProducts.length === 0 && (
-          <div className="text-center py-40 border-2 border-dashed border-gray-100 rounded-[40px]">
-            <Search className="mx-auto text-gray-200 mb-6" size={48} />
-            <h2 className="text-2xl font-serif text-gray-400 italic">No {activeType !== 'all' ? activeType : activeCategory} items found.</h2>
+          <div className="text-center py-40 border-t border-black/5">
+            <h2 className="text-2xl font-serif text-[#7A7A7A] italic">No items matching your selection.</h2>
             <button
-              onClick={() => { router.push('/collection'); setSearchQuery(''); }}
-              className="mt-8 text-accent-gold font-black uppercase tracking-widest text-[10px] underline"
+              onClick={() => { setActiveMain('BAGS'); setActiveSub('ALL'); setSearchQuery(''); setSortBy('Latest'); }}
+              className="mt-6 text-[#C89B3C] font-black uppercase tracking-widest text-[9px] underline block mx-auto"
             >
-              Reset Filters
+              Reset All Filters
             </button>
           </div>
         )}
