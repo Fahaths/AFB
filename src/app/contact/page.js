@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, CheckCircle2, MapPin, Phone, Mail } from 'lucide-react';
+import ClientReflections from '@/components/Review/ClientReflections';
 
 export default function ContactPage() {
   const [formSubmitted, setFormSubmitted] = useState(false);
@@ -217,6 +218,7 @@ export default function ContactPage() {
         </div>
       </section>
 
+      <ClientReflections />
     </div>
   );
 }

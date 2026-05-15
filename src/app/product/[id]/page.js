@@ -15,7 +15,7 @@ export default function ProductDetailPage({ params }) {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submittingReview, setSubmittingReview] = useState(false);
-  const [reviewForm, setReviewForm] = useState({ name: '', rating: 5, comment: '' });
+  const [reviewForm, setReviewForm] = useState({ name: '', email: '', rating: 5, comment: '' });
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [activeImage, setActiveImage] = useState('');
@@ -26,7 +26,11 @@ export default function ProductDetailPage({ params }) {
     async function fetchData() {
       setLoading(true);
       const { data: prodData, error: prodError } = await supabase.from('products').select('*').eq('id', id).single();
-      const { data: revData, error: revError } = await supabase.from('reviews').select('*').eq('product_id', id).order('created_at', { ascending: false });
+      const { data: revData, error: revError } = await supabase
+        .from('reviews')
+        .select('*')
+        .eq('is_visible', true)
+        .order('created_at', { ascending: false });
       
       if (!prodError) {
         setProduct(prodData);
@@ -70,20 +74,21 @@ export default function ProductDetailPage({ params }) {
     const { data, error } = await supabase
       .from('reviews')
       .insert([{ 
-        product_id: id, 
-        name: reviewForm.name, 
+        customer_name: reviewForm.name, 
+        customer_email: reviewForm.email,
         rating: reviewForm.rating, 
-        comment: reviewForm.comment 
+        review_message: reviewForm.comment,
+        is_visible: true
       }])
       .select();
 
     if (error) {
       toast.error(error.message);
     } else {
-      setReviews([data[0], ...reviews]);
-      setReviewForm({ name: '', rating: 5, comment: '' });
+      if (data) setReviews([data[0], ...reviews]);
+      setReviewForm({ name: '', email: '', rating: 5, comment: '' });
       setShowReviewForm(false);
-      toast.success('Thank you for your review!');
+      toast.success('Thank you for sharing your experience!');
     }
     setSubmittingReview(false);
   };
@@ -251,31 +256,30 @@ export default function ProductDetailPage({ params }) {
           </div>
         </div>
 
-        {/* Reviews Section - Full Width Stack */}
+        {/* Client Reflections Section */}
         <div className="mt-32 pt-20 border-t border-gray-200">
-          <div className="flex justify-between items-center mb-16 px-2">
+          <div className="flex flex-col md:flex-row justify-between items-end gap-10 mb-16 px-2">
             <div>
-              <h2 className="text-4xl font-black text-primary-navy font-serif">Customer Feedback</h2>
-              <div className="flex items-center gap-4 mt-2">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="h-[1px] w-10 bg-[#C89B3C]"></span>
+                <span className="text-[#C89B3C] font-black uppercase tracking-[0.5em] text-[10px]">Community Narrative</span>
+              </div>
+              <h2 className="text-5xl font-serif italic text-primary-navy">Client <span className="not-italic font-bold">Reflections.</span></h2>
+              <div className="flex items-center gap-4 mt-4">
                 <div className="flex text-accent-gold">
                   {[...Array(5)].map((_, i) => {
                     const avg = reviews.length > 0 ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length : 5;
-                    return <Star key={i} size={20} fill={i < Math.round(avg) ? "currentColor" : "none"} />;
+                    return <Star key={i} size={16} fill={i < Math.round(avg) ? "currentColor" : "none"} />;
                   })}
                 </div>
-                <span className="text-gray-400 font-bold uppercase tracking-widest text-xs">
+                <span className="text-gray-400 font-bold uppercase tracking-widest text-[9px]">
                   ({reviews.length} Experiences)
                 </span>
-                {reviews.length > 0 && (
-                  <span className="text-accent-gold font-black text-sm ml-2">
-                    {(reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)}
-                  </span>
-                )}
               </div>
             </div>
             <button 
               onClick={() => setShowReviewForm(!showReviewForm)}
-              className="bg-white border-2 border-gray-100 text-gray-400 px-8 py-4 rounded-xl font-bold uppercase tracking-widest text-xs hover:border-accent-gold hover:text-accent-gold transition-all"
+              className="px-10 py-4 border border-gray-100 text-gray-400 font-bold uppercase tracking-widest text-[10px] rounded-xl hover:border-accent-gold hover:text-accent-gold transition-all"
             >
               {showReviewForm ? 'Cancel' : 'Share Experience'}
             </button>
@@ -288,88 +292,110 @@ export default function ProductDetailPage({ params }) {
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 onSubmit={submitReview}
-                className="bg-white p-10 rounded-[40px] shadow-sm border border-gray-100 mb-16 overflow-hidden max-w-4xl mx-auto"
+                className="bg-white p-10 md:p-16 rounded-[40px] shadow-sm border border-gray-100 mb-16 overflow-hidden max-w-4xl mx-auto"
               >
-                <h3 className="text-2xl font-serif font-bold text-primary-navy mb-8 text-center italic">Your Thoughts Matter</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                   <div className="flex flex-col gap-2">
-                    <label className="text-xs font-bold uppercase tracking-widest text-gray-400 px-1">Your Name</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-1">Your Name</label>
                     <input 
                       required
                       value={reviewForm.name}
                       onChange={(e) => setReviewForm({...reviewForm, name: e.target.value})}
-                      className="w-full bg-gray-50 px-6 py-4 rounded-2xl outline-none focus:ring-2 focus:ring-accent-gold/20"
+                      className="w-full bg-gray-50 px-6 py-4 rounded-2xl outline-none focus:ring-1 focus:ring-accent-gold/20 text-sm"
                       placeholder="Enter full name"
                     />
                   </div>
                   <div className="flex flex-col gap-2">
-                    <label className="text-xs font-bold uppercase tracking-widest text-gray-400 px-1">Rating</label>
-                    <div className="flex gap-4 items-center h-full px-4">
-                      {[...Array(5)].map((_, i) => (
-                        <Star 
-                          key={i} 
-                          size={24} 
-                          fill={i < reviewForm.rating ? "#C89B3C" : "none"} 
-                          color={i < reviewForm.rating ? "#C89B3C" : "#ddd"}
-                          onClick={() => setReviewForm({...reviewForm, rating: i + 1})}
-                          className="cursor-pointer"
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  <div className="col-span-full flex flex-col gap-2">
-                    <label className="text-xs font-bold uppercase tracking-widest text-gray-400 px-1">Your Experience</label>
-                    <textarea 
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-1">Email Address</label>
+                    <input 
                       required
-                      value={reviewForm.comment}
-                      onChange={(e) => setReviewForm({...reviewForm, comment: e.target.value})}
-                      rows="4"
-                      className="w-full bg-gray-50 px-6 py-4 rounded-2xl outline-none focus:ring-2 focus:ring-accent-gold/20 resize-none"
-                      placeholder="Meticulously crafted, exceeded expectations..."
-                    ></textarea>
+                      type="email"
+                      value={reviewForm.email}
+                      onChange={(e) => setReviewForm({...reviewForm, email: e.target.value})}
+                      className="w-full bg-gray-50 px-6 py-4 rounded-2xl outline-none focus:ring-1 focus:ring-accent-gold/20 text-sm"
+                      placeholder="Enter your email"
+                    />
                   </div>
                 </div>
+
+                <div className="flex flex-col gap-2 mb-8">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-1">Rating</label>
+                  <div className="flex gap-4 items-center bg-gray-50/50 p-4 rounded-2xl">
+                    {[...Array(5)].map((_, i) => (
+                      <Star 
+                        key={i} 
+                        size={20} 
+                        fill={i < reviewForm.rating ? "#C89B3C" : "none"} 
+                        color={i < reviewForm.rating ? "#C89B3C" : "#ddd"}
+                        onClick={() => setReviewForm({...reviewForm, rating: i + 1})}
+                        className="cursor-pointer"
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2 mb-10">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-1">Your Experience</label>
+                  <textarea 
+                    required
+                    value={reviewForm.comment}
+                    onChange={(e) => setReviewForm({...reviewForm, comment: e.target.value})}
+                    style={{ height: '180px', borderRadius: '28px', padding: '28px' }}
+                    className="w-full bg-gray-50 border border-transparent outline-none focus:border-accent-gold transition-all resize-none text-sm leading-relaxed"
+                    placeholder="Meticulously crafted, exceeded expectations..."
+                  />
+                </div>
+
                 <button 
                   disabled={submittingReview}
-                  className="w-full bg-accent-gold text-white font-black py-5 rounded-2xl mt-10 hover:bg-[#b08935] transition-all disabled:opacity-50 uppercase tracking-[0.2em] text-sm"
+                  style={{ background: '#C89B3C', color: '#071B34', height: '58px', borderRadius: '18px', fontWeight: '600' }}
+                  className="w-full font-black uppercase tracking-[0.3em] text-[11px] flex items-center justify-center gap-4 hover:scale-[1.02] transition-all disabled:opacity-50 shadow-xl shadow-[#C89B3C]/10"
                 >
-                  {submittingReview ? 'Dispatching...' : 'Submit Feedback'}
+                  {submittingReview ? <Loader2 className="animate-spin" size={18} /> : 'Submit Review'}
                 </button>
               </motion.form>
             )}
           </AnimatePresence>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
             {reviews.map((rev) => (
               <motion.div 
                 key={rev.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm flex flex-col"
+                className="break-inside-avoid bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm flex flex-col"
               >
                 <div className="flex justify-between items-center mb-6">
-                  <span className="text-xs font-black uppercase tracking-widest text-primary-navy">{rev.name}</span>
-                  <div className="flex items-center gap-1 bg-primary-navy/5 text-primary-navy px-3 py-1 rounded-full text-[9px] font-bold tracking-widest border border-primary-navy/10">
+                  <span className="text-xs font-black uppercase tracking-widest text-primary-navy">{rev.customer_name}</span>
+                  <div className="flex items-center gap-1 bg-primary-navy/5 text-primary-navy px-3 py-1 rounded-full text-[8px] font-bold tracking-widest border border-primary-navy/10">
                     <Check size={10} strokeWidth={4} /> VERIFIED
                   </div>
                 </div>
                 <div className="flex gap-1 text-accent-gold mb-4">
-                  {[...Array(5)].map((_, i) => <Star key={i} size={14} fill={i < rev.rating ? "currentColor" : "none"} />)}
+                  {[...Array(5)].map((_, i) => <Star key={i} size={12} fill={i < rev.rating ? "currentColor" : "none"} />)}
                 </div>
-                <p className="text-gray-600 leading-relaxed font-medium">"{rev.comment}"</p>
-                <div className="product-review-footer">
-                  {mounted && (
-                    <span className="mt-6 text-[10px] font-bold text-gray-300 uppercase tracking-widest">
-                      {new Date(rev.created_at).toLocaleDateString()}
-                    </span>
-                  )}
-                 </div>
+                <p className="text-gray-600 text-sm leading-relaxed font-medium italic">"{rev.review_message}"</p>
+                
+                {rev.admin_reply && (
+                  <div className="mt-6 p-5 bg-[#071B34]/5 border-l-2 border-accent-gold rounded-r-2xl">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-accent-gold mb-2 flex items-center gap-2">
+                       Al Fahath Response
+                    </p>
+                    <p className="text-[11px] text-primary-navy/70 leading-relaxed italic">
+                      {rev.admin_reply}
+                    </p>
+                  </div>
+                )}
+
+                <div className="mt-6 text-[8px] font-bold text-gray-300 uppercase tracking-widest block">
+                   {new Date(rev.created_at).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}
+                </div>
               </motion.div>
             ))}
           </div>
 
           {reviews.length === 0 && !showReviewForm && (
-            <div className="text-center py-20 bg-white rounded-[40px] border border-dashed border-gray-200 mt-12">
+            <div className="text-center py-20 bg-white rounded-[40px] border border-dashed border-gray-200">
               <MessageSquare className="mx-auto text-gray-200 mb-4" size={40} />
               <p className="text-gray-400 font-serif italic text-xl">Be the first to share your experience.</p>
             </div>

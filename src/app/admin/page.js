@@ -32,6 +32,7 @@ import { supabase } from '@/lib/supabase';
 import toast, { Toaster } from 'react-hot-toast';
 import ProductForm from '@/components/Admin/ProductForm';
 import AssetManager from '@/components/Admin/AssetManager';
+import ReviewManager from '@/components/Admin/ReviewManager';
 
 // --- Sub-Components ---
 
@@ -345,6 +346,7 @@ export default function AdminDashboard() {
   const [siteSettings, setSiteSettings] = useState({});
   const [mainCategories, setMainCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
+  const [reviewCount, setReviewCount] = useState(0);
 
   // Fetch all categories and types from DB instead of hardcoded
   const dynamicCategories = ['All Categories', ...mainCategories.map(c => c.name)];
@@ -386,12 +388,14 @@ export default function AdminDashboard() {
       const { data: prods } = await supabase.from('products').select('*').order('created_at', { ascending: false });
       const { data: mainCats } = await supabase.from('main_categories').select('*').order('name');
       const { data: subCats } = await supabase.from('sub_categories').select('*').order('name');
+      const { count: revCount } = await supabase.from('reviews').select('*', { count: 'exact', head: true });
       const { data: slides } = await supabase.from('site_settings').select('*').eq('key', 'hero_slides').single();
       const { data: settings } = await supabase.from('site_settings').select('*');
       
       setProducts(prods || []);
       setMainCategories(mainCats || []);
       setSubCategories(subCats || []);
+      setReviewCount(revCount || 0);
       setHeroSlides(slides?.value || []);
       
       const settingsMap = {};
@@ -564,7 +568,7 @@ export default function AdminDashboard() {
           <SidebarItem id="hero" icon={<ImageIcon size={18} />} label="Hero Slides" activeTab={activeTab} setActiveTab={setActiveTab} />
           <SidebarItem id="products" icon={<ShoppingBag size={18} />} label="Products" activeTab={activeTab} setActiveTab={setActiveTab} />
           <SidebarItem id="categories" icon={<Tags size={18} />} label="Categories" activeTab={activeTab} setActiveTab={setActiveTab} />
-          <SidebarItem id="testimonials" icon={<MessageSquare size={18} />} label="Testimonials" activeTab={activeTab} setActiveTab={setActiveTab} />
+          <SidebarItem id="reviews" icon={<MessageSquare size={18} />} label="Reviews" activeTab={activeTab} setActiveTab={setActiveTab} />
           <div className="pt-4 pb-2 px-6">
             <span className="text-[8px] font-black uppercase tracking-[0.5em] text-[#8B97A8]/40">Editorial</span>
           </div>
@@ -602,6 +606,12 @@ export default function AdminDashboard() {
                   value={[...new Set(products.map(p => p.category))].length} 
                   icon={<Layers size={24} />} 
                   color="#34D399" 
+                />
+                <StatWidget 
+                  label="Customer Reviews" 
+                  value={reviewCount} 
+                  icon={<MessageSquare size={24} />} 
+                  color="#F59E0B" 
                 />
                 <StatWidget 
                   label="Inventory Value" 
@@ -758,6 +768,12 @@ export default function AdminDashboard() {
                 onDelete={handleDeleteCategory}
                 onSeed={handleSeedCategories}
               />
+            </motion.div>
+          )}
+
+          {activeTab === 'reviews' && (
+            <motion.div key="reviews" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
+              <ReviewManager />
             </motion.div>
           )}
 
