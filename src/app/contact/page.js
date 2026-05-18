@@ -8,6 +8,8 @@ import ClientReflections from '@/components/Review/ClientReflections';
 export default function ContactPage() {
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [formData, setFormData] = useState({ name: '', message: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   const socialPlatforms = [
     { 
@@ -45,9 +47,34 @@ export default function ContactPage() {
   ];
 
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setFormSubmitted(true);
+    setIsSubmitting(true);
+    setErrorMsg('');
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to submit form');
+      }
+
+      setFormSubmitted(true);
+      setFormData({ name: '', message: '' });
+    } catch (err) {
+      console.error(err);
+      setErrorMsg(err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -134,12 +161,16 @@ export default function ContactPage() {
                         className="w-full bg-[#F7F3EE] border-none rounded-[14px] p-5 text-sm font-medium focus:ring-2 focus:ring-[#C89B3C]/20 transition-all outline-none resize-none"
                       />
                     </div>
+                    {errorMsg && (
+                      <p className="text-red-500 text-xs font-bold text-center mt-2">{errorMsg}</p>
+                    )}
                     <button 
                       type="submit"
-                      className="w-full bg-[#071B34] text-white py-5 rounded-[14px] font-black uppercase tracking-[0.3em] text-[12px] flex items-center justify-center gap-4 transition-all hover:bg-[#C89B3C] hover:-translate-y-1 shadow-xl shadow-[#071B34]/10"
+                      disabled={isSubmitting}
+                      className="w-full bg-[#071B34] text-white py-5 rounded-[14px] font-black uppercase tracking-[0.3em] text-[12px] flex items-center justify-center gap-4 transition-all hover:bg-[#C89B3C] hover:-translate-y-1 shadow-xl shadow-[#071B34]/10 disabled:opacity-50 disabled:hover:translate-y-0"
                     >
-                      Send Message
-                      <Send size={16} />
+                      {isSubmitting ? 'Sending...' : 'Send Message'}
+                      {!isSubmitting && <Send size={16} />}
                     </button>
                   </form>
                 </motion.div>

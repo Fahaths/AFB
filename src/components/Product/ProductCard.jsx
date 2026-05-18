@@ -24,7 +24,7 @@ export default function ProductCard({ product }) {
         className="bg-white rounded-[28px] border border-[rgba(7,27,52,0.05)] shadow-[0_10px_30px_rgba(0,0,0,0.04)] overflow-hidden flex flex-col h-full group"
       >
         {/* Unified Image Area */}
-        <Link href={`/product/${product.id}`} className="block relative aspect-square w-full bg-[#F8F8F8] overflow-hidden">
+        <Link href={`/collection/${(product.category || 'general').toLowerCase()}/${product.slug || product.id}`} className="block relative aspect-square w-full bg-[#F8F8F8] overflow-hidden">
           <img
             src={product.image_url}
             alt={product.name}
@@ -36,7 +36,7 @@ export default function ProductCard({ product }) {
         <div className="flex flex-col gap-[14px] p-6 flex-1">
           <div className="flex flex-col gap-1.5">
             <span className="text-[9px] text-[rgba(7,27,52,0.45)] font-black uppercase tracking-[0.3em]">{product.category}</span>
-            <Link href={`/product/${product.id}`} className="block">
+            <Link href={`/collection/${(product.category || 'general').toLowerCase()}/${product.slug || product.id}`} className="block">
               <h3 className="text-[17px] font-bold text-[#071B34] font-serif leading-tight line-clamp-2 hover:text-[#0C2D57] transition-colors">
                 {product.name}
               </h3>

@@ -30,6 +30,30 @@ export default function RootLayout({ children }) {
           {children}
         </ConditionalLayout>
         <Toaster position="bottom-right" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "name": "AFB LUXE",
+              "url": "https://afb-luxe.com",
+              "logo": "https://afb-luxe.com/logo.png",
+              "description": "Experience luxury with Al Fahath Bags and Footwear.",
+              "sameAs": [
+                "https://www.instagram.com/afb_luxe",
+                "https://www.facebook.com/afb_luxe"
+              ],
+              "contactPoint": {
+                "@type": "ContactPoint",
+                "telephone": "+91-9840031124",
+                "contactType": "customer service",
+                "areaServed": "IN",
+                "availableLanguage": ["en", "Tamil"]
+              }
+            })
+          }}
+        />
       </body>
     </html>
   );

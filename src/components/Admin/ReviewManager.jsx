@@ -19,7 +19,7 @@ export default function ReviewManager() {
     try {
       const { data, error } = await supabase
         .from('reviews')
-        .select('*')
+        .select('*, products(name)')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -106,6 +106,7 @@ export default function ReviewManager() {
             <thead>
               <tr className="border-b border-white/5 bg-white/5">
                 <th className="pl-10 pr-6 py-6 text-[9px] font-black text-[#8B97A8] uppercase tracking-[0.3em]">Contributor</th>
+                <th className="px-6 py-6 text-[9px] font-black text-[#8B97A8] uppercase tracking-[0.3em]">Product</th>
                 <th className="px-6 py-6 text-[9px] font-black text-[#8B97A8] uppercase tracking-[0.3em]">Rating</th>
                 <th className="px-6 py-6 text-[9px] font-black text-[#8B97A8] uppercase tracking-[0.3em]">Review Message</th>
                 <th className="px-6 py-6 text-[9px] font-black text-[#8B97A8] uppercase tracking-[0.3em]">Visibility</th>
@@ -131,6 +132,18 @@ export default function ReviewManager() {
                          <span className="text-[10px] text-[#8B97A8] font-bold opacity-60 lowercase">{rev.customer_email}</span>
                       </div>
                     </div>
+                  </td>
+
+                  <td className="px-6 py-8 align-top">
+                    {rev.products?.name ? (
+                      <span className="inline-block bg-[#C89B3C]/10 text-[#C89B3C] border border-[#C89B3C]/20 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest whitespace-nowrap">
+                        {rev.products.name}
+                      </span>
+                    ) : (
+                      <span className="inline-block bg-white/5 text-white/40 border border-white/10 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest">
+                        General
+                      </span>
+                    )}
                   </td>
                   
                   <td className="px-6 py-8 align-top">

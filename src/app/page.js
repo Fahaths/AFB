@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import ProductCard from '@/components/Product/ProductCard';
-import ClientReflections from '@/components/Review/ClientReflections';
+
 import { Loader2, ArrowRight } from 'lucide-react';
 
 export default function Home() {
@@ -195,8 +195,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Community Narratives */}
-      <ClientReflections />
+
     </div>
   );
 }

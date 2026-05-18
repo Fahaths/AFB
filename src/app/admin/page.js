@@ -26,13 +26,15 @@ import {
   X,
   Briefcase,
   Footprints,
-  Watch
+  Watch,
+  Mail
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import toast, { Toaster } from 'react-hot-toast';
 import ProductForm from '@/components/Admin/ProductForm';
 import AssetManager from '@/components/Admin/AssetManager';
 import ReviewManager from '@/components/Admin/ReviewManager';
+import EnquiryManager from '@/components/Admin/EnquiryManager';
 
 // --- Sub-Components ---
 
@@ -494,7 +496,7 @@ export default function AdminDashboard() {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (password === 'admin123') {
+    if (password === '1234567890') {
       setIsAuthenticated(true);
       localStorage.setItem('afb_admin_session', 'active');
       toast.success('Access Granted');
@@ -574,6 +576,7 @@ export default function AdminDashboard() {
           </div>
           <SidebarItem id="about" icon={<Info size={18} />} label="About Story" activeTab={activeTab} setActiveTab={setActiveTab} />
           <SidebarItem id="contact" icon={<Phone size={18} />} label="Contact" activeTab={activeTab} setActiveTab={setActiveTab} />
+          <SidebarItem id="mails" icon={<Mail size={18} />} label="Mails" activeTab={activeTab} setActiveTab={setActiveTab} />
         </nav>
 
         <div className="p-8 border-t border-white/5">
@@ -784,6 +787,12 @@ export default function AdminDashboard() {
                 </Card>
              </motion.div>
           )}
+
+          {activeTab === 'mails' && (
+            <motion.div key="mails" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
+              <EnquiryManager />
+            </motion.div>
+          )}
         </AnimatePresence>
 
         {/* Product Modal */}
@@ -834,6 +843,7 @@ export default function AdminDashboard() {
 
                       const productData = {
                         name: data.name,
+                        slug: data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''),
                         price: parseFloat(data.price),
                         description: data.description,
                         category: data.category,

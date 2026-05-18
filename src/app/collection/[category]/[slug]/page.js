@@ -10,12 +10,12 @@ import toast from 'react-hot-toast';
 import ProductCard from '@/components/Product/ProductCard';
 
 export default function ProductDetailPage({ params }) {
-  const { id } = use(params);
+  const { slug } = use(params);
   const [product, setProduct] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submittingReview, setSubmittingReview] = useState(false);
-  const [reviewForm, setReviewForm] = useState({ name: '', email: '', rating: 5, comment: '' });
+  const [reviewForm, setReviewForm] = useState({ name: '', rating: 5, comment: '' });
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [activeImage, setActiveImage] = useState('');
@@ -25,14 +25,17 @@ export default function ProductDetailPage({ params }) {
     setMounted(true);
     async function fetchData() {
       setLoading(true);
-      const { data: prodData, error: prodError } = await supabase.from('products').select('*').eq('id', id).single();
-      const { data: revData, error: revError } = await supabase
-        .from('reviews')
-        .select('*')
-        .eq('is_visible', true)
-        .order('created_at', { ascending: false });
+      const { data: prodData, error: prodError } = await supabase.from('products').select('*').eq('slug', slug).single();
       
-      if (!prodError) {
+      if (prodData) {
+        const productId = prodData.id;
+        const { data: revData, error: revError } = await supabase
+          .from('reviews')
+          .select('*')
+          .eq('product_id', productId)
+          .eq('is_visible', true)
+          .order('created_at', { ascending: false });
+        
         setProduct(prodData);
         setActiveImage(prodData.image_url);
         
@@ -41,15 +44,15 @@ export default function ProductDetailPage({ params }) {
           .from('products')
           .select('*')
           .eq('category', prodData.category)
-          .neq('id', id)
+          .neq('id', productId)
           .limit(3);
         setRelatedProducts(relData || []);
+        if (!revError) setReviews(revData || []);
       }
-      if (!revError) setReviews(revData || []);
       setLoading(false);
     }
     fetchData();
-  }, [id]);
+  }, [slug]);
 
   const productGallery = product ? (
     product.images && product.images.length > 0 ? product.images : [
@@ -74,8 +77,8 @@ export default function ProductDetailPage({ params }) {
     const { data, error } = await supabase
       .from('reviews')
       .insert([{ 
+        product_id: product.id,
         customer_name: reviewForm.name, 
-        customer_email: reviewForm.email,
         rating: reviewForm.rating, 
         review_message: reviewForm.comment,
         is_visible: true
@@ -86,7 +89,7 @@ export default function ProductDetailPage({ params }) {
       toast.error(error.message);
     } else {
       if (data) setReviews([data[0], ...reviews]);
-      setReviewForm({ name: '', email: '', rating: 5, comment: '' });
+      setReviewForm({ name: '', rating: 5, comment: '' });
       setShowReviewForm(false);
       toast.success('Thank you for sharing your experience!');
     }
@@ -111,6 +114,36 @@ export default function ProductDetailPage({ params }) {
 
   return (
     <div className="min-h-screen bg-[#F8F6F4]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            "name": product.name,
+            "image": product.image_url,
+            "description": product.description || `Experience unparalleled craftmanship with the ${product.name}. A testament to luxury and timeless design.`,
+            "sku": product.item_code || `AFB-${product.id.substring(0, 4).toUpperCase()}`,
+            "brand": {
+              "@type": "Brand",
+              "name": "AFB LUXE"
+            },
+            "offers": {
+              "@type": "Offer",
+              "url": `https://afb-luxe.com/collection/${(product.category || 'general').toLowerCase()}/${slug}`,
+              "priceCurrency": "INR",
+              "price": product.price,
+              "itemCondition": "https://schema.org/NewCondition",
+              "availability": "https://schema.org/InStock"
+            },
+            "aggregateRating": reviews.length > 0 ? {
+              "@type": "AggregateRating",
+              "ratingValue": (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1),
+              "reviewCount": reviews.length
+            } : undefined
+          })
+        }}
+      />
       
       <main className="pt-24 pb-20 px-6 md:px-12 max-w-7xl mx-auto">
         {/* Breadcrumbs */}
@@ -249,7 +282,7 @@ export default function ProductDetailPage({ params }) {
               <div className="bg-white p-5 rounded-3xl border border-gray-100">
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Item Code</p>
                 <p className="text-sm font-black text-primary-navy">
-                  {product.item_code || `AFB-${id.substring(0, 4).toUpperCase()}`}
+                  {product.item_code || `AFB-${product.id.substring(0, 4).toUpperCase()}`}
                 </p>
               </div>
             </div>
@@ -294,7 +327,7 @@ export default function ProductDetailPage({ params }) {
                 onSubmit={submitReview}
                 className="bg-white p-10 md:p-16 rounded-[40px] shadow-sm border border-gray-100 mb-16 overflow-hidden max-w-4xl mx-auto"
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div className="grid grid-cols-1 gap-8 mb-8">
                   <div className="flex flex-col gap-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-1">Your Name</label>
                     <input 
@@ -303,17 +336,6 @@ export default function ProductDetailPage({ params }) {
                       onChange={(e) => setReviewForm({...reviewForm, name: e.target.value})}
                       className="w-full bg-gray-50 px-6 py-4 rounded-2xl outline-none focus:ring-1 focus:ring-accent-gold/20 text-sm"
                       placeholder="Enter full name"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-1">Email Address</label>
-                    <input 
-                      required
-                      type="email"
-                      value={reviewForm.email}
-                      onChange={(e) => setReviewForm({...reviewForm, email: e.target.value})}
-                      className="w-full bg-gray-50 px-6 py-4 rounded-2xl outline-none focus:ring-1 focus:ring-accent-gold/20 text-sm"
-                      placeholder="Enter your email"
                     />
                   </div>
                 </div>
@@ -403,14 +425,14 @@ export default function ProductDetailPage({ params }) {
         </div>
 
         {/* Related Products Section - Full Width Topic */}
-        <div className="mt-32 pt-20 border-t border-gray-200">
-          <div className="flex items-center justify-between mb-16">
-            <h2 className="text-4xl font-black text-primary-navy font-serif italic capitalize">Related <span className="text-accent-gold">Exquisite</span> Treasures</h2>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-            {relatedProducts.length > 0 ? (
-              relatedProducts.map((relProduct, idx) => (
+        {relatedProducts.length > 0 && (
+          <div className="mt-32 pt-20 border-t border-gray-200">
+            <div className="flex items-center justify-between mb-16">
+              <h2 className="text-4xl font-black text-primary-navy font-serif italic capitalize">Related <span className="text-accent-gold">Exquisite</span> Treasures</h2>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+              {relatedProducts.map((relProduct, idx) => (
                 <motion.div
                   key={relProduct.id}
                   initial={{ opacity: 0, scale: 0.9 }}
@@ -419,25 +441,10 @@ export default function ProductDetailPage({ params }) {
                 >
                   <ProductCard product={relProduct} />
                 </motion.div>
-              ))
-            ) : (
-              [
-                { id: 'd1', name: "Midnight Noir Handbag", price: 1850, category: "bags", material: "Saffiano", image_url: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=1935&auto=format&fit=crop" },
-                { id: 'd2', name: "Emerald Velvet Slippers", price: 650, category: "footwear", material: "Velvet", image_url: "https://images.unsplash.com/photo-1619441207908-42622abd2c1d?q=80&w=2071&auto=format&fit=crop" },
-                { id: 'd3', name: "Gold-Trimmed Chronograph", price: 12400, category: "accessories", material: "18k Gold", image_url: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?q=80&w=1999&auto=format&fit=crop" }
-              ].map((dummy, idx) => (
-                <motion.div
-                  key={dummy.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: idx * 0.15 }}
-                >
-                  <ProductCard product={dummy} />
-                </motion.div>
-              ))
-            )}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </main>
     </div>
   );
