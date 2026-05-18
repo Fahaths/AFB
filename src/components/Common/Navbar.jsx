@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Search, ShoppingBag, Menu, X } from 'lucide-react';
+import { Search, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Navbar() {
@@ -39,9 +39,11 @@ export default function Navbar() {
           
           {/* Logo - Left */}
           <Link href="/" className="flex items-center group relative z-10">
-            <span className="text-white text-2xl font-black tracking-tight font-serif uppercase">
-              AFB <span className="text-[#C89B3C] ml-1">LUXE</span>
-            </span>
+            <img 
+              src="/logo.png" 
+              alt="Al Fahath Bags & Footwears Logo" 
+              className="h-[54px] md:h-[62px] w-auto object-contain transition-transform duration-500 group-hover:scale-105" 
+            />
           </Link>
 
           {/* Navigation - Center */}
@@ -88,7 +90,11 @@ export default function Navbar() {
             className="fixed inset-0 bg-[#071B34] z-[2000] lg:hidden flex flex-col p-10"
           >
             <div className="flex justify-between items-center mb-20">
-              <span className="text-white text-2xl font-black font-serif tracking-tight uppercase">AFB <span className="text-[#C89B3C]">LUXE</span></span>
+              <img 
+                src="/logo.png" 
+                alt="Al Fahath Bags & Footwears Logo" 
+                className="h-[48px] w-auto object-contain" 
+              />
               <button onClick={() => setMobileMenuOpen(false)} className="text-white"><X size={28} /></button>
             </div>
             <div className="flex flex-col gap-10">

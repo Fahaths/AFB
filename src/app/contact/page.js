@@ -2,14 +2,13 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, CheckCircle2, MapPin, Phone, Mail } from 'lucide-react';
-import ClientReflections from '@/components/Review/ClientReflections';
+import { Send, CheckCircle2, MapPin, Phone, Mail, ArrowUpRight } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function ContactPage() {
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [formData, setFormData] = useState({ name: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
 
   const socialPlatforms = [
     { 
@@ -49,8 +48,8 @@ export default function ContactPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return; // Prevent duplicate submissions
     setIsSubmitting(true);
-    setErrorMsg('');
 
     try {
       const response = await fetch('/api/contact', {
@@ -69,9 +68,10 @@ export default function ContactPage() {
 
       setFormSubmitted(true);
       setFormData({ name: '', message: '' });
+      toast.success('Enquiry sent successfully!');
     } catch (err) {
       console.error(err);
-      setErrorMsg(err.message);
+      toast.error(err.message || 'Curation Failed. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -93,7 +93,7 @@ export default function ContactPage() {
             Let’s Start a <br /> <span className="italic font-normal">Conversation.</span>
           </h1>
           <p className="text-[#6B7280] text-lg md:text-[18px] font-medium tracking-wide leading-[1.8] max-w-[520px]">
-            Reach out for enquiries, collaborations, or to discover the latest from Al Fahath.
+            Reach out for enquiries, collaborations, or to discover the latest from Al Fahath Bags & Footwears.
           </p>
         </motion.div>
       </header>
@@ -161,9 +161,6 @@ export default function ContactPage() {
                         className="w-full bg-[#F7F3EE] border-none rounded-[14px] p-5 text-sm font-medium focus:ring-2 focus:ring-[#C89B3C]/20 transition-all outline-none resize-none"
                       />
                     </div>
-                    {errorMsg && (
-                      <p className="text-red-500 text-xs font-bold text-center mt-2">{errorMsg}</p>
-                    )}
                     <button 
                       type="submit"
                       disabled={isSubmitting}
@@ -219,37 +216,60 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* Google Map Section */}
-      <section className="py-20 px-8 lg:px-[10%]">
+      {/* Premium Full-Width Google Map Section */}
+      <section className="py-20 px-6 md:px-12 lg:px-[10%] bg-[#F5F1EA] border-t border-black/5">
         <div className="max-w-[1280px] mx-auto">
-          <div className="rounded-[40px] overflow-hidden h-[500px] shadow-2xl border border-white/10 relative">
-             <iframe 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3886.5332156826!2d80.2443003!3d13.0653003!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a52661000000000%3A0x0!2zMTPCsDAzJzU1LjEiTiA4MMKwMTQnNDAuNiJF!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin" 
-                width="100%" 
-                height="100%" 
-                style={{ border: 0, filter: 'grayscale(1) invert(0.92) contrast(1.2)' }} 
-                allowFullScreen="" 
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              ></iframe>
-              <div className="absolute top-10 left-10 bg-white/90 backdrop-blur-md p-8 rounded-[32px] border border-black/5 shadow-xl">
-                 <h4 className="text-[#071B34] font-serif font-bold text-xl mb-4">Visit the Atelier</h4>
-                 <div className="space-y-4">
-                    <div className="flex items-center gap-3 text-sm text-[#7A7A7A]">
-                       <MapPin size={16} className="text-[#C89B3C]" />
-                       <span>Elite District, Global Fashion Hub</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm text-[#7A7A7A]">
-                       <Phone size={16} className="text-[#C89B3C]" />
-                       <span>+91 98400 31124</span>
-                    </div>
-                 </div>
-              </div>
-          </div>
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, ease: [0.25, 1, 0.5, 1] }}
+            style={{
+              borderRadius: '32px',
+              overflow: 'hidden',
+              border: '1px solid rgba(0,0,0,0.05)',
+              boxShadow: '0 25px 50px -12px rgba(7, 27, 52, 0.12)'
+            }}
+            className="relative h-[450px] md:h-[580px] w-full group hover:shadow-[0_30px_60px_rgba(200,155,60,0.12)] transition-shadow duration-500"
+          >
+            <iframe 
+              src="https://maps.google.com/maps?q=no:236,%20Thirumanjana%20Gopuram%20St,%20Ganesapuram,%20Tiruvannamalai,%20Tamil%20Nadu%20606601&t=&z=16&ie=UTF8&iwloc=&output=embed" 
+              width="100%" 
+              height="100%" 
+              style={{ border: 0, filter: 'grayscale(0.1) contrast(1.05)' }} 
+              allowFullScreen="" 
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            ></iframe>
+            
+            {/* Elegant Floating Atelier Address Card */}
+            <div className="absolute top-6 left-6 md:top-10 md:left-10 bg-white/95 backdrop-blur-md p-6 md:p-8 rounded-[24px] md:rounded-[32px] border border-black/5 shadow-2xl max-w-sm z-20">
+               <span className="text-[#C89B3C] font-black uppercase tracking-[0.4em] text-[9px] block mb-2">Our Atelier</span>
+               <h4 className="text-[#071B34] font-serif font-bold text-xl md:text-2xl mb-4">Al Fahath Bags & Footwears</h4>
+               <div className="space-y-4 text-sm text-gray-600">
+                  <div className="flex items-start gap-3">
+                     <MapPin size={18} className="text-[#C89B3C] shrink-0 mt-0.5" />
+                     <span>no:236, Thirumanjana Gopuram St, Ganesapuram, Tiruvannamalai, Tamil Nadu 606601</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                     <Phone size={18} className="text-[#C89B3C]" />
+                     <span>+91 98400 31124</span>
+                  </div>
+               </div>
+               <a 
+                 href="https://www.google.com/maps/search/?api=1&query=no:236,+Thirumanjana+Gopuram+St,+Ganesapuram,+Tiruvannamalai,+Tamil+Nadu+606601" 
+                 target="_blank" 
+                 rel="noopener noreferrer"
+                 className="mt-6 w-full py-4 bg-[#071B34] hover:bg-[#C89B3C] text-white hover:text-[#071B34] font-black uppercase tracking-widest text-[9px] rounded-xl flex items-center justify-center gap-2 transition-all duration-300 shadow-lg shadow-[#071B34]/10"
+               >
+                 Get Directions
+                 <ArrowUpRight size={14} />
+               </a>
+            </div>
+          </motion.div>
         </div>
       </section>
-
-      <ClientReflections />
+      
     </div>
   );
 }

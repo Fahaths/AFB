@@ -34,39 +34,25 @@ export default function AboutPage() {
             built with <span className="italic font-normal">purpose.</span>
           </h1>
           <p className="text-[#6B7280] text-lg md:text-[18px] font-medium tracking-wide leading-[1.8] max-w-[520px]">
-            Al Fahath is more than a collection. It is a reflection of identity, craftsmanship, and timeless elegance.
+            Al Fahath Bags & Footwears is more than a collection. It is a reflection of identity, craftsmanship, and timeless elegance.
           </p>
         </motion.div>
       </header>
 
       {/* Brand Journey Section - Alternating Layout */}
       <section className="py-40 px-8 lg:px-[10%] bg-white">
-        <div className="max-w-[1280px] mx-auto flex flex-col gap-40">
+        <div className="max-w-[1280px] mx-auto">
           
-          {/* Block 1: Text Left + Image Right */}
+          {/* What We Offer Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-            <motion.div {...fadeInUp} className="max-w-md">
-              <span className="text-[#C89B3C] font-black uppercase tracking-[0.4em] text-[9px] mb-4 block">The Genesis</span>
-              <h2 className="text-4xl font-serif text-[#071B34] mb-8">A New Standard</h2>
-              <p className="text-[#7A7A7A] leading-relaxed text-lg">
-                The journey began with a simple question: How do we create pieces that transcend the noise of fast fashion? Our answer was a return to the essentials of design and the integrity of materials.
-              </p>
+            <motion.div {...fadeInUp} className="aspect-[4/5] rounded-[40px] overflow-hidden shadow-2xl">
+              <img src="/journey2.jpg" className="w-full h-full object-cover" alt="Al Fahath Bags & Footwears Storefront" />
             </motion.div>
-            <motion.div {...fadeInUp} transition={{ delay: 0.2 }} className="aspect-[4/5] rounded-[40px] overflow-hidden shadow-2xl">
-              <img src="https://images.unsplash.com/photo-1590674899484-13da0d1b58f5?q=80&w=2070&auto=format&fit=crop" className="w-full h-full object-cover" alt="Journey 1" />
-            </motion.div>
-          </div>
-
-          {/* Block 2: Image Left + Text Right */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-            <motion.div {...fadeInUp} className="order-2 lg:order-1 aspect-[4/5] rounded-[40px] overflow-hidden shadow-2xl">
-              <img src="https://images.unsplash.com/photo-1594913785162-e67860bd259e?q=80&w=1931&auto=format&fit=crop" className="w-full h-full object-cover" alt="Journey 2" />
-            </motion.div>
-            <motion.div {...fadeInUp} transition={{ delay: 0.2 }} className="order-1 lg:order-2 max-w-md ml-auto">
-              <span className="text-[#C89B3C] font-black uppercase tracking-[0.4em] text-[9px] mb-4 block">The Vision</span>
-              <h2 className="text-4xl font-serif text-[#071B34] mb-8">A Silent Luxury</h2>
-              <p className="text-[#7A7A7A] leading-relaxed text-lg">
-                We believe in the power of the understated. Our aesthetic is a dialogue between shadow and light, form and function—curated for those who find elegance in the details others overlook.
+            <motion.div {...fadeInUp} transition={{ delay: 0.2 }} className="max-w-md ml-auto">
+              <span className="text-[#C89B3C] font-black uppercase tracking-[0.4em] text-[9px] mb-4 block">What We Offer</span>
+              <h2 className="text-4xl font-serif text-[#071B34] mb-8">Crafted For Everyday Style</h2>
+              <p className="text-[#7A7A7A] leading-relaxed text-base">
+                Al Fahath Bags & Footwears offers a curated collection of premium bags, footwear, watches, belts, and lifestyle accessories for men, women, and kids. From travel bags, school bags, handbags, and pouches to shoes, slippers, sandals, watches, and everyday essentials every piece is selected for comfort, durability, and timeless style. Our journey is built around delivering quality products with a refined luxury experience.
               </p>
             </motion.div>
           </div>
@@ -87,9 +73,9 @@ export default function AboutPage() {
           </motion.div>
           <motion.div {...fadeInUp} transition={{ delay: 0.2 }} className="relative aspect-square lg:aspect-[4/5] rounded-[60px] overflow-hidden shadow-2xl">
             <img 
-              src="https://images.unsplash.com/photo-1558231580-043c7b396901?q=80&w=2070&auto=format&fit=crop" 
+              src="/craftsmanship.jpg" 
               className="w-full h-full object-cover" 
-              alt="Craftsmanship Close-up" 
+              alt="Al Fahath Bags & Footwears Craftsmanship Close-up" 
             />
             <div className="absolute inset-0 bg-black/10"></div>
           </motion.div>
@@ -147,7 +133,7 @@ export default function AboutPage() {
           </h2>
           <div className="mt-12 flex flex-col items-center">
             <div className="w-px h-16 bg-[#C89B3C] mb-6"></div>
-            <p className="text-[10px] font-black uppercase tracking-[0.5em] text-[#7A7A7A]">Al Fahath // Creative Vision</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.5em] text-[#7A7A7A]">Al Fahath Bags & Footwears // Creative Vision</p>
           </div>
         </motion.div>
       </section>

@@ -79,7 +79,7 @@ export default function Home() {
           >
             <div className="flex items-center gap-3 mb-8">
               <span className="h-[1px] w-10 bg-[#C89B3C]"></span>
-              <span className="text-[#C89B3C] font-black uppercase tracking-[0.5em] text-[10px]">Al Fahath Archive</span>
+              <span className="text-[#C89B3C] font-black uppercase tracking-[0.5em] text-[10px]">Al Fahath Bags & Footwears Archive</span>
             </div>
 
             <h1 className="text-[clamp(42px,5.5vw,76px)] font-bold text-white font-serif leading-[0.95] mb-8 tracking-tighter">
@@ -88,7 +88,7 @@ export default function Home() {
             </h1>
 
             <p className="text-[#C8CDD4] text-[15px] mb-10 font-medium tracking-wide leading-[1.8] max-w-[380px]">
-              Discover the cinematic precision of Al Fahath, where editorial aesthetics meet centuries of global craftsmanship.
+              Discover the cinematic precision of Al Fahath Bags & Footwears, where editorial aesthetics meet centuries of global craftsmanship.
             </p>
 
             <div className="flex flex-wrap items-center gap-8">
@@ -165,18 +165,10 @@ export default function Home() {
       {/* Featured Editorial Collection Grid */}
       <section className="py-32 px-6 md:px-[7%] bg-[#F7F3EE]">
         <div className="max-w-[1280px] mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-16 items-end mb-24">
-            <div className="md:col-span-8">
-              <span className="text-[#C89B3C] font-black uppercase tracking-[0.5em] text-[10px] block mb-4">Volume 01 // Archive</span>
-              <h2 className="text-5xl md:text-7xl font-bold text-[#071B34] font-serif leading-tight">
-                Refined <span className="italic font-normal">Essentials.</span>
-              </h2>
-            </div>
-            <div className="md:col-span-4 pb-4">
-              <p className="text-[#7A7A7A] text-lg font-medium leading-relaxed">
-                Selected for their ability to define a moment and last a lifetime.
-              </p>
-            </div>
+          <div className="mb-24 border-b border-[#071B34]/5 pb-10">
+            <h2 className="text-5xl md:text-7xl font-bold text-[#071B34] font-serif leading-tight">
+              Newly Arrived <span className="italic font-normal text-[#C89B3C]">Collection.</span>
+            </h2>
           </div>
 
           {loading ? (

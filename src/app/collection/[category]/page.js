@@ -304,13 +304,14 @@ export default function CollectionCategoryPage({ params }) {
         )}
 
         {!loading && filteredProducts.length === 0 && (
-          <div className="text-center py-40 border-t border-black/5">
-            <h2 className="text-2xl font-serif text-[#7A7A7A] italic">No items matching your selection.</h2>
+          <div className="text-center py-40 border-t border-black/5 flex flex-col items-center">
+            <h2 className="text-3xl font-serif text-[#071B34] italic mb-3">Curated pieces arriving soon.</h2>
+            <p className="text-sm text-[#7A7A7A] max-w-sm leading-relaxed mb-8">Our next collection is being prepared.</p>
             <button
               onClick={() => { setActiveMain('BAGS'); setActiveSub('ALL'); setSearchQuery(''); setSortBy('Latest'); }}
-              className="mt-6 text-[#C89B3C] font-black uppercase tracking-widest text-[9px] underline block mx-auto"
+              className="px-8 py-3 bg-[#071B34] text-white rounded-xl font-black uppercase tracking-widest text-[9px] hover:bg-[#C89B3C] transition-colors"
             >
-              Reset All Filters
+              Discover Collections
             </button>
           </div>
         )}

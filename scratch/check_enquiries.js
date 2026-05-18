@@ -5,9 +5,13 @@ const supabase = createClient(
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhma2tleGFnZnR1dmtxYXJndnh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzExMDcsImV4cCI6MjA5MjEwNzEwN30.GPoQI7HkSL7-l6sVojSVtVabOdlnAn_6YxPat-OKvAk"
 );
 
-async function testInsert() {
-  const res = await supabase.from('enquiries').insert([{ name: 'test no select', message: 'test' }]);
-  console.log("Insert result:", res);
+async function checkEnquiries() {
+  const { data, error } = await supabase.from('enquiries').select('*').limit(1);
+  if (data && data.length > 0) {
+    console.log("Enquiries columns:", Object.keys(data[0]));
+  } else {
+    console.log("No enquiries records found or table is empty");
+  }
 }
 
-testInsert();
+checkEnquiries();

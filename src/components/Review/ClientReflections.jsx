@@ -144,7 +144,7 @@ export default function ClientReflections() {
                     onChange={(e) => setFormData({...formData, message: e.target.value})}
                     style={{ height: '180px', borderRadius: '28px', padding: '28px' }}
                     className="w-full bg-gray-50 border border-transparent outline-none focus:border-[#C89B3C] transition-all resize-none text-sm leading-relaxed"
-                    placeholder="Describe your encounter with Al Fahath..."
+                    placeholder="Describe your encounter with Al Fahath Bags & Footwears..."
                   />
                 </div>
 

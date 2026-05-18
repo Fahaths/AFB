@@ -8,7 +8,7 @@ export default function Footer() {
   const socialIcons = [
     { 
       name: 'Instagram', 
-      url: '#',
+      url: 'https://www.instagram.com/afb_luxe',
       icon: (
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
@@ -19,7 +19,7 @@ export default function Footer() {
     },
     { 
       name: 'Facebook', 
-      url: '#',
+      url: 'https://www.facebook.com/afb_luxe',
       icon: (
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
@@ -28,7 +28,7 @@ export default function Footer() {
     },
     { 
       name: 'Twitter', 
-      url: '#',
+      url: 'https://twitter.com/afb_luxe',
       icon: (
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
@@ -48,19 +48,17 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1.3fr_0.8fr_1fr] gap-y-[50px] lg:gap-x-[100px]">
           
           {/* Brand Section */}
-          <div className="space-y-8">
-            <Link href="/" className="inline-block">
-              <motion.span 
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                className="text-white text-[42px] font-black tracking-[-1px] uppercase font-serif leading-none block"
-              >
-                AFB <span className="text-[#C89B3C]">LUXE</span>
-              </motion.span>
+          <div className="space-y-4">
+            <Link href="/" className="inline-block group">
+              <img 
+                src="/logo.png" 
+                alt="Al Fahath Bags & Footwears Logo" 
+                className="h-[115px] w-auto object-contain transition-transform duration-500 group-hover:scale-105" 
+              />
             </Link>
             
-            <p className="text-[rgba(255,255,255,0.72)] text-[17px] leading-[1.8] max-w-[340px] font-medium">
-              Handcrafted for the discerning individual. We blend traditional craftsmanship with contemporary luxury to create pieces that tell a story of global heritage.
+            <p className="text-[rgba(255,255,255,0.72)] text-[17px] leading-[1.8] max-w-[340px] font-medium italic tracking-wide">
+              "Carry without limits."
             </p>
 
             <div className="flex gap-[14px]">
@@ -68,6 +66,8 @@ export default function Footer() {
                 <motion.a
                   key={idx}
                   href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   whileHover={{ y: -6, backgroundColor: '#C89B3C', color: '#071B34', boxShadow: '0 10px 25px rgba(200,155,60,0.3)' }}
                   className="w-[44px] h-[44px] rounded-full bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] flex items-center justify-center transition-all duration-300 text-white/60"
                 >
@@ -105,9 +105,9 @@ export default function Footer() {
             <h3 className="text-[#C89B3C] text-[12px] font-black uppercase tracking-[3px]">Inquiries</h3>
             <div className="flex flex-col gap-5">
               {[
-                { icon: <MapPin size={18} />, text: 'Elite District, Suite 402, Global Fashion Hub, IN 600001' },
+                { icon: <MapPin size={18} />, text: 'no:236, Thirumanjana Gopuram St, Ganesapuram, Tiruvannamalai, Tamil Nadu 606601' },
                 { icon: <Phone size={18} />, text: '+91 98400 31124' },
-                { icon: <Mail size={18} />, text: 'concierge@afbluxe.com' }
+                { icon: <Mail size={18} />, text: 'alfahathbagsandfootwear@gmail.com' }
               ].map((item, idx) => (
                 <div 
                   key={idx}
@@ -130,13 +130,15 @@ export default function Footer() {
 
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-8 pb-[10px]">
-          <p className="text-[11px] font-black uppercase tracking-[2px] opacity-[0.45]">
-            © 2026 Al Fahath Luxe. Crafted for Legacy.
-          </p>
+          <div className="text-[11px] font-black uppercase tracking-[2px] opacity-[0.45] text-center md:text-left leading-relaxed">
+            © 2026 Al Fahath Bags & Footwears. Crafted for Legacy.
+            <span className="block md:inline md:ml-4 text-gray-400 font-sans tracking-wide">
+              Developer: <a href="https://fahath-s-digital-marketer.vercel.app/" target="_blank" rel="noopener noreferrer" className="hover:text-[#C89B3C] transition-colors underline lowercase">Fahath Portfolio</a>
+            </span>
+          </div>
           <div className="flex gap-[40px] text-[11px] font-black uppercase tracking-[2px] opacity-[0.45]">
-            <Link href="#" className="hover:text-[#C89B3C] transition-colors">Privacy</Link>
-            <Link href="#" className="hover:text-[#C89B3C] transition-colors">Terms</Link>
-            <Link href="#" className="hover:text-[#C89B3C] transition-colors">Instagram</Link>
+            <Link href="/privacy" className="hover:text-[#C89B3C] transition-colors">Privacy</Link>
+            <Link href="/terms" className="hover:text-[#C89B3C] transition-colors">Terms</Link>
           </div>
         </div>
       </div>

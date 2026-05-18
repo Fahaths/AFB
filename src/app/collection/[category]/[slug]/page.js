@@ -45,7 +45,7 @@ export default function ProductDetailPage({ params }) {
           .select('*')
           .eq('category', prodData.category)
           .neq('id', productId)
-          .limit(3);
+          .limit(4);
         setRelatedProducts(relData || []);
         if (!revError) setReviews(revData || []);
       }
@@ -206,6 +206,22 @@ export default function ProductDetailPage({ params }) {
               {product.name}
             </h1>
 
+            {reviews.length > 0 ? (
+              <div className="flex items-center gap-3">
+                <div className="flex text-accent-gold">
+                  {[...Array(5)].map((_, i) => {
+                    const avg = reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length;
+                    return <Star key={i} size={14} fill={i < Math.round(avg) ? "currentColor" : "none"} />;
+                  })}
+                </div>
+                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">({reviews.length} Reflections)</span>
+                <span className="text-gray-300">|</span>
+                <button onClick={() => { setShowReviewForm(true); setTimeout(() => document.getElementById('reviews-section')?.scrollIntoView({ behavior: 'smooth' }), 100); }} className="text-[10px] text-accent-gold font-bold uppercase tracking-widest hover:underline cursor-pointer">Write a review</button>
+              </div>
+            ) : (
+              <button onClick={() => { setShowReviewForm(true); setTimeout(() => document.getElementById('reviews-section')?.scrollIntoView({ behavior: 'smooth' }), 100); }} className="text-[10px] text-[#7A7A7A] font-bold uppercase tracking-widest hover:underline text-left self-start cursor-pointer">Be the first to share your experience</button>
+            )}
+
             <p className="text-gray-500 text-lg leading-relaxed">
               {product.description || `Experience unparalleled craftmanship with the ${product.name}. A testament to luxury and timeless design.`}
             </p>
@@ -290,7 +306,7 @@ export default function ProductDetailPage({ params }) {
         </div>
 
         {/* Client Reflections Section */}
-        <div className="mt-32 pt-20 border-t border-gray-200">
+        <div id="reviews-section" className="mt-32 pt-20 border-t border-gray-200">
           <div className="flex flex-col md:flex-row justify-between items-end gap-10 mb-16 px-2">
             <div>
               <div className="flex items-center gap-3 mb-4">
@@ -312,9 +328,9 @@ export default function ProductDetailPage({ params }) {
             </div>
             <button 
               onClick={() => setShowReviewForm(!showReviewForm)}
-              className="px-10 py-4 border border-gray-100 text-gray-400 font-bold uppercase tracking-widest text-[10px] rounded-xl hover:border-accent-gold hover:text-accent-gold transition-all"
+              className="px-10 py-4 border border-gray-100 text-[#071B34] font-black uppercase tracking-widest text-[10px] rounded-xl hover:border-accent-gold hover:text-accent-gold hover:bg-white transition-all duration-300 shadow-sm"
             >
-              {showReviewForm ? 'Cancel' : 'Share Experience'}
+              {showReviewForm ? 'Cancel' : 'Write A Review'}
             </button>
           </div>
 
@@ -379,47 +395,52 @@ export default function ProductDetailPage({ params }) {
             )}
           </AnimatePresence>
 
-          <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
-            {reviews.map((rev) => (
-              <motion.div 
-                key={rev.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="break-inside-avoid bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm flex flex-col"
-              >
-                <div className="flex justify-between items-center mb-6">
-                  <span className="text-xs font-black uppercase tracking-widest text-primary-navy">{rev.customer_name}</span>
-                  <div className="flex items-center gap-1 bg-primary-navy/5 text-primary-navy px-3 py-1 rounded-full text-[8px] font-bold tracking-widest border border-primary-navy/10">
-                    <Check size={10} strokeWidth={4} /> VERIFIED
+          {reviews.length === 0 ? (
+            <motion.div 
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white/80 backdrop-blur-md rounded-[32px] border border-gray-100 p-12 text-center max-w-lg mx-auto shadow-sm flex flex-col items-center gap-4 mb-8"
+            >
+              <MessageSquare size={32} className="text-[#C89B3C] opacity-60 animate-pulse" />
+              <p className="font-serif italic text-lg text-primary-navy font-bold">No reflections yet.</p>
+              <p className="text-gray-400 text-xs font-bold uppercase tracking-widest leading-relaxed">Be the first to share your experience with this exquisite piece.</p>
+            </motion.div>
+          ) : (
+            <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
+              {reviews.map((rev) => (
+                <motion.div 
+                  key={rev.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="break-inside-avoid bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm flex flex-col"
+                >
+                  <div className="flex justify-between items-center mb-6">
+                    <span className="text-xs font-black uppercase tracking-widest text-primary-navy">{rev.customer_name}</span>
+                    <div className="flex items-center gap-1 bg-primary-navy/5 text-primary-navy px-3 py-1 rounded-full text-[8px] font-bold tracking-widest border border-primary-navy/10">
+                      <Check size={10} strokeWidth={4} /> VERIFIED
+                    </div>
                   </div>
-                </div>
-                <div className="flex gap-1 text-accent-gold mb-4">
-                  {[...Array(5)].map((_, i) => <Star key={i} size={12} fill={i < rev.rating ? "currentColor" : "none"} />)}
-                </div>
-                <p className="text-gray-600 text-sm leading-relaxed font-medium italic">"{rev.review_message}"</p>
-                
-                {rev.admin_reply && (
-                  <div className="mt-6 p-5 bg-[#071B34]/5 border-l-2 border-accent-gold rounded-r-2xl">
-                    <p className="text-[9px] font-black uppercase tracking-widest text-accent-gold mb-2 flex items-center gap-2">
-                       Al Fahath Response
-                    </p>
-                    <p className="text-[11px] text-primary-navy/70 leading-relaxed italic">
-                      {rev.admin_reply}
-                    </p>
+                  <div className="flex gap-1 text-accent-gold mb-4">
+                    {[...Array(5)].map((_, i) => <Star key={i} size={12} fill={i < rev.rating ? "currentColor" : "none"} />)}
                   </div>
-                )}
+                  <p className="text-gray-600 text-sm leading-relaxed font-medium italic">"{rev.review_message}"</p>
+                  
+                  {rev.admin_reply && (
+                    <div className="mt-6 p-5 bg-[#071B34]/5 border-l-2 border-accent-gold rounded-r-2xl">
+                      <p className="text-[9px] font-black uppercase tracking-widest text-accent-gold mb-2 flex items-center gap-2">
+                         Al Fahath Bags & Footwears Response
+                      </p>
+                      <p className="text-[11px] text-primary-navy/70 leading-relaxed italic">
+                        {rev.admin_reply}
+                      </p>
+                    </div>
+                  )}
 
-                <div className="mt-6 text-[8px] font-bold text-gray-300 uppercase tracking-widest block">
-                   {new Date(rev.created_at).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-
-          {reviews.length === 0 && !showReviewForm && (
-            <div className="text-center py-20 bg-white rounded-[40px] border border-dashed border-gray-200">
-              <MessageSquare className="mx-auto text-gray-200 mb-4" size={40} />
-              <p className="text-gray-400 font-serif italic text-xl">Be the first to share your experience.</p>
+                  <div className="mt-6 text-[8px] font-bold text-gray-300 uppercase tracking-widest block">
+                     {new Date(rev.created_at).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}
+                  </div>
+                </motion.div>
+              ))}
             </div>
           )}
         </div>
@@ -431,7 +452,7 @@ export default function ProductDetailPage({ params }) {
               <h2 className="text-4xl font-black text-primary-navy font-serif italic capitalize">Related <span className="text-accent-gold">Exquisite</span> Treasures</h2>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
               {relatedProducts.map((relProduct, idx) => (
                 <motion.div
                   key={relProduct.id}

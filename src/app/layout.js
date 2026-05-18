@@ -15,8 +15,8 @@ const poppins = Poppins({
 });
 
 export const metadata = {
-  title: "AFB LUXE | Premium Collection",
-  description: "Experience luxury with Al Fahath Bags and Footwear.",
+  title: "Al Fahath Bags & Footwears | Premium Collection",
+  description: "Experience luxury with Al Fahath Bags & Footwears.",
 };
 
 export default function RootLayout({ children }) {
@@ -36,10 +36,10 @@ export default function RootLayout({ children }) {
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Organization",
-              "name": "AFB LUXE",
+              "name": "Al Fahath Bags & Footwears",
               "url": "https://afb-luxe.com",
               "logo": "https://afb-luxe.com/logo.png",
-              "description": "Experience luxury with Al Fahath Bags and Footwear.",
+              "description": "Experience luxury with Al Fahath Bags & Footwears.",
               "sameAs": [
                 "https://www.instagram.com/afb_luxe",
                 "https://www.facebook.com/afb_luxe"

@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import nodemailer from 'nodemailer';
 
 export async function POST(request) {
   try {
@@ -12,44 +11,55 @@ export async function POST(request) {
     }
 
     // 1. Store in Supabase
-    // Note: The user needs to create an "enquiries" table in Supabase 
-    // with columns: id, name, message, created_at
-    const { data, error } = await supabase
+    const { data: dbData, error: dbError } = await supabase
       .from('enquiries')
-      .insert([{ name, message }]);
+      .insert([{ name, message }])
+      .select();
 
-    if (error) {
-      console.error('Supabase error:', error);
-      return NextResponse.json({ error: 'Failed to save enquiry to database. Ensure the "enquiries" table exists.' }, { status: 500 });
+    if (dbError) {
+      console.error('Supabase save failed:', dbError);
+      return NextResponse.json({ error: 'Failed to record your enquiry. Please try again.' }, { status: 500 });
     }
 
-    // 2. Send Email
-    // Setup transporter using SMTP details from env vars
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port: process.env.SMTP_PORT || 587,
-      secure: false, // true for 465, false for other ports
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+    // 2. Deliver Email via Resend
+    const resendApiKey = process.env.RESEND_API_KEY;
+    if (resendApiKey) {
+      try {
+        const response = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${resendApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: 'Al Fahath Bags & Footwears <onboarding@resend.dev>',
+            to: 'alfahathbagsandfootwear@gmail.com',
+            subject: `New Enquiry from ${name}`,
+            html: `
+              <div style="font-family: serif; color: #071B34; padding: 20px; max-width: 600px; border: 1px solid rgba(7, 27, 52, 0.1);">
+                <h2 style="border-bottom: 1px solid #C89B3C; padding-bottom: 10px; text-transform: uppercase; letter-spacing: 0.1em;">New Atelier Enquiry</h2>
+                <p><strong>Name:</strong> ${name}</p>
+                <p style="background: #F7F3EE; padding: 15px; border-radius: 8px; font-style: italic;">"${message}"</p>
+                <footer style="margin-top: 20px; font-size: 11px; color: #7A7A7A; border-top: 1px solid rgba(7, 27, 52, 0.05); padding-top: 10px;">
+                  Sent from Al Fahath Bags & Footwears Platform
+                </footer>
+              </div>
+            `,
+          }),
+        });
 
-    const mailOptions = {
-      from: process.env.SMTP_USER || '"AFB Contact Form" <noreply@example.com>',
-      to: process.env.CONTACT_EMAIL || process.env.SMTP_USER,
-      subject: `New Enquiry from ${name}`,
-      text: `You have received a new enquiry.\n\nName: ${name}\nMessage: ${message}`,
-      html: `<h3>New Enquiry</h3><p><strong>Name:</strong> ${name}</p><p><strong>Message:</strong> ${message}</p>`,
-    };
-
-    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-      await transporter.sendMail(mailOptions);
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Resend delivery failed:', errorText);
+        }
+      } catch (emailErr) {
+        console.error('Resend server request failed:', emailErr);
+      }
     } else {
-      console.warn("SMTP credentials not configured. Skipping email send.");
+      console.warn("RESEND_API_KEY is not defined in environment variables. Email notification skipped.");
     }
 
-    return NextResponse.json({ success: true, data });
+    return NextResponse.json({ success: true, data: dbData });
   } catch (err) {
     console.error('Server error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
