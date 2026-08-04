@@ -157,30 +157,32 @@ export default function ProductDetailPage({ params }) {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           {/* Left: Enhanced Image Gallery (Sidebar Style) */}
-          <div className="lg:col-span-7 grid grid-cols-5 gap-4">
+          <div className={`lg:col-span-7 ${productGallery.length > 1 ? 'grid grid-cols-5 gap-4' : 'flex justify-center'}`}>
             {/* Thumbnails Sidebar */}
-            <div className="flex flex-col gap-4">
-              {productGallery.slice(1).map((img, i) => (
-                <div 
-                  key={i} 
-                  onClick={() => setActiveImage(img)}
-                  className={`aspect-square bg-white rounded-2xl p-3 border cursor-pointer transition-all overflow-hidden group ${
-                    activeImage === img ? 'border-[#C89B3C] shadow-lg scale-105' : 'border-gray-100 hover:border-gray-200'
-                  }`}
-                >
-                   <img 
-                    src={img} 
-                    alt={`Detail ${i+1}`} 
-                    className={`w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500 ${
-                      activeImage === img ? 'opacity-100' : 'opacity-60 hover:opacity-100'
+            {productGallery.length > 1 && (
+              <div className="flex flex-col gap-4">
+                {productGallery.map((img, i) => (
+                  <div 
+                    key={i} 
+                    onClick={() => setActiveImage(img)}
+                    className={`aspect-square bg-white rounded-2xl p-3 border cursor-pointer transition-all overflow-hidden group ${
+                      activeImage === img ? 'border-[#C89B3C] shadow-lg scale-105' : 'border-gray-100 hover:border-gray-200'
                     }`}
-                  />
-                </div>
-              ))}
-            </div>
+                  >
+                     <img 
+                      src={img} 
+                      alt={`Detail ${i+1}`} 
+                      className={`w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500 ${
+                        activeImage === img ? 'opacity-100' : 'opacity-60 hover:opacity-100'
+                      }`}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
             
             {/* Main Image */}
-            <div className="col-span-4 bg-white rounded-[40px] p-10 md:p-16 aspect-[4/5] flex items-center justify-center shadow-sm border border-gray-50 relative overflow-hidden">
+            <div className={`${productGallery.length > 1 ? 'col-span-4' : 'w-full'} bg-white rounded-[40px] p-10 md:p-16 aspect-[4/5] flex items-center justify-center shadow-sm border border-gray-50 relative overflow-hidden`}>
               <AnimatePresence mode="wait">
                 <motion.img 
                   key={activeImage}
