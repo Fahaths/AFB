@@ -15,8 +15,20 @@ const poppins = Poppins({
 });
 
 export const metadata = {
+  metadataBase: new URL("https://afb-luxe.com"),
   title: "Al Fahath Bags & Footwears | Premium Collection",
   description: "Experience luxury with Al Fahath Bags & Footwears.",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
+  verification: {
+    google: "wiaJVjaD3M7KqfY7K9MFPrpe8yhX8oAREqyznIbmw8Y",
+  },
+  openGraph: {
+    images: "/logo.png",
+  },
 };
 
 export default function RootLayout({ children }) {
