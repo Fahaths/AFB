@@ -45,25 +45,60 @@ export default function RootLayout({ children }) {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Organization",
-              "name": "Al Fahath Bags & Footwears",
-              "url": "https://afb-luxe.com",
-              "logo": "https://afb-luxe.com/logo.png",
-              "description": "Experience luxury with Al Fahath Bags & Footwears.",
-              "sameAs": [
-                "https://www.instagram.com/afb_luxe",
-                "https://www.facebook.com/afb_luxe"
-              ],
-              "contactPoint": {
-                "@type": "ContactPoint",
+            __html: JSON.stringify([
+              {
+                "@context": "https://schema.org",
+                "@type": "Store",
+                "name": "Al Fahath Bags & Footwears",
+                "image": "https://afb-luxe.com/logo.png",
+                "@id": "https://afb-luxe.com/#store",
+                "url": "https://afb-luxe.com",
                 "telephone": "+91-9840031124",
-                "contactType": "customer service",
-                "areaServed": "IN",
-                "availableLanguage": ["en", "Tamil"]
+                "priceRange": "$$",
+                "address": {
+                  "@type": "PostalAddress",
+                  "streetAddress": "no:236, Thirumanjana Gopuram St, Ganesapuram",
+                  "addressLocality": "Tiruvannamalai",
+                  "addressRegion": "Tamil Nadu",
+                  "postalCode": "606601",
+                  "addressCountry": "IN"
+                },
+                "geo": {
+                  "@type": "GeoCoordinates",
+                  "latitude": 12.2251,
+                  "longitude": 79.0747
+                },
+                "openingHoursSpecification": {
+                  "@type": "OpeningHoursSpecification",
+                  "dayOfWeek": [
+                    "Monday",
+                    "Tuesday",
+                    "Wednesday",
+                    "Thursday",
+                    "Friday",
+                    "Saturday",
+                    "Sunday"
+                  ],
+                  "opens": "09:00",
+                  "closes": "21:00"
+                },
+                "sameAs": [
+                  "https://www.instagram.com/afb_luxe",
+                  "https://www.facebook.com/afb_luxe"
+                ]
+              },
+              {
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                "name": "Al Fahath Bags & Footwears",
+                "url": "https://afb-luxe.com",
+                "potentialAction": {
+                  "@type": "SearchAction",
+                  "target": "https://afb-luxe.com/collection?search={search_term_string}",
+                  "query-input": "required name=search_term_string"
+                }
               }
-            })
+            ])
           }}
         />
       </body>
