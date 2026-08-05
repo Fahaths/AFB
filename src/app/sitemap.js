@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase';
 
 export default async function sitemap() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://afb-luxe.com';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://alfahathbagsandfootwear.com';
 
   // Fetch all products
   const { data: products } = await supabase.from('products').select('slug, category, created_at');

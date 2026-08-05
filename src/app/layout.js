@@ -15,7 +15,7 @@ const poppins = Poppins({
 });
 
 export const metadata = {
-  metadataBase: new URL("https://afb-luxe.com"),
+  metadataBase: new URL("https://alfahathbagsandfootwear.com"),
   title: "Al Fahath Bags & Footwears | Premium Collection",
   description: "Experience luxury with Al Fahath Bags & Footwears.",
   icons: {
@@ -50,9 +50,9 @@ export default function RootLayout({ children }) {
                 "@context": "https://schema.org",
                 "@type": "Store",
                 "name": "Al Fahath Bags & Footwears",
-                "image": "https://afb-luxe.com/logo.png",
-                "@id": "https://afb-luxe.com/#store",
-                "url": "https://afb-luxe.com",
+                "image": "https://alfahathbagsandfootwear.com/logo.png",
+                "@id": "https://alfahathbagsandfootwear.com/#store",
+                "url": "https://alfahathbagsandfootwear.com",
                 "telephone": "+91-9840031124",
                 "priceRange": "$$",
                 "address": {
@@ -83,18 +83,18 @@ export default function RootLayout({ children }) {
                   "closes": "21:00"
                 },
                 "sameAs": [
-                  "https://www.instagram.com/afb_luxe",
-                  "https://www.facebook.com/afb_luxe"
+                  "https://www.instagram.com/alfahathbagsandfootwear",
+                  "https://www.facebook.com/alfahathbagsandfootwear"
                 ]
               },
               {
                 "@context": "https://schema.org",
                 "@type": "WebSite",
                 "name": "Al Fahath Bags & Footwears",
-                "url": "https://afb-luxe.com",
+                "url": "https://alfahathbagsandfootwear.com",
                 "potentialAction": {
                   "@type": "SearchAction",
-                  "target": "https://afb-luxe.com/collection?search={search_term_string}",
+                  "target": "https://alfahathbagsandfootwear.com/collection?search={search_term_string}",
                   "query-input": "required name=search_term_string"
                 }
               }

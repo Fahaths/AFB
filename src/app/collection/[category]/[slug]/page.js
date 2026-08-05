@@ -130,7 +130,7 @@ export default function ProductDetailPage({ params }) {
             },
             "offers": {
               "@type": "Offer",
-              "url": `https://afb-luxe.com/collection/${(product.category || 'general').toLowerCase()}/${slug}`,
+              "url": `https://alfahathbagsandfootwear.com/collection/${(product.category || 'general').toLowerCase()}/${slug}`,
               "priceCurrency": "INR",
               "price": product.price,
               "itemCondition": "https://schema.org/NewCondition",

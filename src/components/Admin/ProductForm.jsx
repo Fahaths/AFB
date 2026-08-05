@@ -226,7 +226,7 @@ export default function ProductForm({ onSubmit, initialData, isSubmitting, onClo
             
             <CustomInput 
               label="Item Code" 
-              placeholder="AFB-LUXE-001"
+              placeholder="ALFAHATHBAGSANDFOOTWEAR-001"
               value={formData.item_code}
               onChange={(e) => setFormData({...formData, item_code: e.target.value})}
             />
